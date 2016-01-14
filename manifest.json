@@ -3,11 +3,6 @@
     "name": "Px Downloader",
     "version": "1.0.0",
     "description": "Download Pixiv images",
-    "applications": {
-        "gecko": {
-            "id": "pxdownloader@rndomhack.com"
-        }
-    },
     "icons": {
         "16": "icon/icon16.png",
         "48": "icon/icon48.png",
