@@ -3,8 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <title>Px Downloader - Options</title>
+    <link rel="stylesheet" href="../css/kathamo.min.css">
+    <link rel="stylesheet" href="../css/options.css">
 </head>
 <body>
+    <div class="container" id="options">
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <h2>設定</h2>
+            <label>ディレクトリ名</label>
+            <input class="ui-full-width" type="text" id="dir">
+            <label>ファイル名</label>
+            <input class="ui-full-width" type="text" id="file">
+            <label>ページ名</label>
+            <input class="ui-full-width" type="text" id="page">
+            <label>うごイラの保存形式</label>
+            <select class="ui-full-width" id="ugoiraMode">
+                <option value="zip">Zip</option>
+                <option value="gif">Gif</option>
+                <option value="apng">Apng</option>
+                <option value="webm">WebM</option>
+            </select>
+            <label>うごイラのGif品質</label>
+            <input class="ui-full-width" type="range" min="1" max="30" id="gifQuality">
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <h2>説明</h2>
+            <h3>マクロ</h3>
+            <p>名前には以下のマクロが使用できます</p>
+            <table class="ui-full-width">
+                <thead>
+                    <tr>
+                        <th>マクロ</th>
+                        <th>説明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>${id}</td>
+                        <td>イラスト/ノベルのID</td>
+                    </tr>
+                    <tr>
+                        <td>${title}</td>
+                        <td>イラスト/ノベルのタイトル</td>
+                    </tr>
+                    <tr>
+                        <td>${userId}</td>
+                        <td>投稿者のID</td>
+                    </tr>
+                    <tr>
+                        <td>${userName}</td>
+                        <td>投稿者の名前</td>
+                    </tr>
+                    <tr>
+                        <td>${page}</td>
+                        <td>ページ数 *ページ名のみ</td>
+                    </tr>
+                    <tr>
+                        <td>${page2}</td>
+                        <td>ページ数(2桁) *ページ名のみ</td>
+                    </tr>
+                    <tr>
+                        <td>${page3}</td>
+                        <td>ページ数(3桁) *ページ名のみ</td>
+                    </tr>
+                    <tr>
+                        <td>${page4}</td>
+                        <td>ページ数(4桁) *ページ名のみ</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
+    <script src="../js/options.js"></script>
 </body>
 </html>
