@@ -16,6 +16,12 @@
             <input class="ui-full-width" type="text" id="file">
             <label>ページ名</label>
             <input class="ui-full-width" type="text" id="page">
+            <label>ファイルが既に存在した場合の処理</label>
+            <select class="ui-full-width" id="conflictAction">
+                <option value="uniquify">別名で保存する</option>
+                <option value="overwrite">上書きする</option>
+                <option value="prompt">プロンプトを出す</option>
+            </select>
             <label>うごイラの保存形式</label>
             <select class="ui-full-width" id="ugoiraMode">
                 <option value="zip">Zip</option>

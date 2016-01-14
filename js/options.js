@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "dir",
                 "file",
                 "page",
+                "conflictAction",
                 "ugoiraMode",
                 "gifQuality"
             ], items => {
@@ -39,6 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         document.querySelector("#page").addEventListener("change", ev => {
             setOptions({ page: ev.currentTarget.value });
+        });
+
+        document.querySelector("#conflictAction").addEventListener("change", ev => {
+            setOptions({ conflictAction: ev.currentTarget.value });
         });
 
         document.querySelector("#ugoiraMode").addEventListener("change", ev => {
