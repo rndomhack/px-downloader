@@ -1,0 +1,38 @@
+{
+    "manifest_version": 2,
+    "name": "Px Downloader",
+    "version": "1.0.0",
+    "description": "Download Pixiv images",
+    "applications": {
+        "gecko": {
+            "id": "pxdownloader@rndomhack.com"
+        }
+    },
+    "icons": {
+        "16": "icon/icon16.png",
+        "48": "icon/icon48.png",
+        "128": "icon/icon128.png"
+    },
+    "background": {
+        "scripts": ["lib/px-background.js", "js/background.js"],
+        "persistent": false
+    },
+    "content_scripts": [
+        {
+            "matches": ["*://*.pixiv.net/*"],
+            "css": ["css/content.css"],
+            "js": ["lib/jszip.min.js", "lib/gif.js", "lib/apng.js", "lib/whammy.js", "lib/px-context.js", "js/content.js"]
+        }
+    ],
+    "options_ui": {
+        "page": "html/options.html",
+        "chrome_style": true
+    },
+    "permissions": [
+        "tabs",
+        "cookies",
+        "storage",
+        "downloads",
+        "*://*.pixiv.net/"
+    ]
+}
