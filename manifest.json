@@ -36,10 +36,5 @@
         "storage",
         "downloads",
         "*://*.pixiv.net/"
-    ],
-    "applications": {
-        "gecko": {
-            "id": "px-downloader@rndomhack.com"
-        }
-    }
+    ]
 }
