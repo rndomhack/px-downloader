@@ -1,10 +1,12 @@
 /* global chrome */
 "use strict";
 
+const storage = chrome.storage.hasOwnProperty("sync") ? chrome.storage.sync : chrome.storage.local;
+
 document.addEventListener("DOMContentLoaded", () => {
     function getOptions() {
         return new Promise(resolve => {
-            chrome.storage.sync.get([
+            storage.get([
                 "dir",
                 "file",
                 "page",
@@ -19,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setOptions(options) {
         return new Promise(resolve => {
-            chrome.storage.sync.set(options, items => {
+            storage.set(options, items => {
                 resolve(items);
             });
         });
