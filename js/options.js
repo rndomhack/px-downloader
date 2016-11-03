@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 "page",
                 "conflictAction",
                 "ugoiraMode",
-                "gifQuality"
+                "ugoiraQuality"
             ], items => {
                 resolve(items);
             });
@@ -52,8 +52,8 @@ document.addEventListener("DOMContentLoaded", () => {
             setOptions({ ugoiraMode: ev.currentTarget.value });
         });
 
-        document.querySelector("#gifQuality").addEventListener("change", ev => {
-            setOptions({ gifQuality: parseInt(ev.currentTarget.value, 10) });
+        document.querySelector("#ugoiraQuality").addEventListener("change", ev => {
+            setOptions({ ugoiraQuality: parseFloat(ev.currentTarget.value) });
         });
     });
 });

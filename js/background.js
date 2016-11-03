@@ -2,7 +2,7 @@
 "use strict";
 
 (() => {
-    var pxBackground = new PxBackground();
+    const pxBackground = new PxBackground();
 
     pxBackground.init();
 })();
