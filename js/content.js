@@ -1,7 +1,7 @@
 /* global PxContent, PxContentWhitecube */
 "use strict";
 
-(() => {
+document.addEventListener("DOMContentLoaded", () => {
     function start() {
         const pxContent = new PxContent();
         const pxContentWhitecube = new PxContentWhitecube();
@@ -47,4 +47,4 @@
     });
 
     start();
-})();
+});

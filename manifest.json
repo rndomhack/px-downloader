@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Px Downloader",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "Download Pixiv images",
     "icons": {
         "16": "icon/icon16.png",
@@ -16,14 +16,14 @@
         "default_title": "Px Downloader"
     },
     "background": {
-        "scripts": ["lib/px-background.js", "js/background.js"],
-        "persistent": false
+        "scripts": ["lib/extension-util.js", "lib/px-background.js", "js/background.js"]
     },
     "content_scripts": [
         {
             "matches": ["*://*.pixiv.net/*"],
             "css": ["css/content.css"],
-            "js": ["lib/jszip.min.js", "lib/gif.js", "lib/apng.js", "lib/webp.js", "lib/storage.js", "lib/px-context.js", "lib/px-context-whitecube.js", "js/content.js"]
+            "js": ["lib/extension-util.js", "lib/jszip.min.js", "lib/gif.js", "lib/apng.js", "lib/webp.js", "lib/px-content.js", "lib/px-content-whitecube.js", "js/content.js"],
+            "run_at": "document_start"
         }
     ],
     "options_ui": {
