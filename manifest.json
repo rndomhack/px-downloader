@@ -3,6 +3,7 @@
     "name": "Px Downloader",
     "version": "2.1.1",
     "description": "Download Pixiv images",
+    "author": "rndomhack",
     "icons": {
         "16": "icon/icon16.png",
         "48": "icon/icon48.png",
@@ -16,7 +17,8 @@
         "default_title": "Px Downloader"
     },
     "background": {
-        "scripts": ["lib/namespace.js", "lib/extension-util.js", "lib/px-background.js", "js/background.js"]
+        "scripts": ["lib/namespace.js", "lib/extension-util.js", "lib/px-background.js", "js/background.js"],
+        "persistent": false
     },
     "content_scripts": [
         {
