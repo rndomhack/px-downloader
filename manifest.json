@@ -23,7 +23,6 @@
     "content_scripts": [
         {
             "matches": ["*://*.pixiv.net/*"],
-            "css": ["css/content.css"],
             "js": ["lib/namespace.js", "lib/extension-util.js", "lib/jszip.min.js", "lib/gif.js", "lib/apng.js", "lib/webp.js", "lib/px-content.js", "lib/px-content-whitecube.js", "js/content.js"],
             "run_at": "document_start"
         }
