@@ -9,6 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
         "file",
         "page",
         "conflictAction",
+        "convertMode",
+        "convertQuality",
         "ugoiraMode",
         "ugoiraQuality"
     ]).then(options => {
@@ -32,6 +34,14 @@ document.addEventListener("DOMContentLoaded", () => {
             util.setOptions({ conflictAction: ev.currentTarget.value });
         });
 
+        document.querySelector("#convertMode").addEventListener("change", ev => {
+            util.setOptions({ convertMode: ev.currentTarget.value });
+        });
+
+        document.querySelector("#convertQuality").addEventListener("change", ev => {
+            util.setOptions({ convertQuality: parseFloat(ev.currentTarget.value) });
+        });
+
         document.querySelector("#ugoiraMode").addEventListener("change", ev => {
             util.setOptions({ ugoiraMode: ev.currentTarget.value });
         });
@@ -41,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (util.browser !== "chrome") {
+            document.querySelector("#convertMode").removeChild(document.querySelector("#convertMode option[value='webp']"));
             document.querySelector("#ugoiraMode").removeChild(document.querySelector("#ugoiraMode option[value='webp']"));
         }
     });

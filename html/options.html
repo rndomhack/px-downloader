@@ -22,7 +22,16 @@
                 <option value="overwrite">上書きする</option>
                 <option value="prompt">プロンプトを出す</option>
             </select>
-            <label>うごイラの保存形式</label>
+            <label>イラストの変換形式</label>
+            <select class="ui-full-width" id="convertMode">
+                <option value="none">なし</option>
+                <option value="jpeg">Jpeg</option>
+                <option value="png">Png</option>
+                <option value="webp">WebP</option>
+            </select>
+            <label>イラストの変換品質</label>
+            <input class="ui-full-width" type="range" min="0" max="1" step="0.1" id="convertQuality">
+            <label>うごイラの形式</label>
             <select class="ui-full-width" id="ugoiraMode">
                 <option value="zip">Zip</option>
                 <option value="gif">Gif</option>

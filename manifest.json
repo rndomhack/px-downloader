@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Px Downloader",
-    "version": "2.1.1",
+    "version": "2.2.0",
     "description": "Download Pixiv images",
     "author": "rndomhack",
     "icons": {
@@ -23,7 +23,7 @@
     "content_scripts": [
         {
             "matches": ["*://*.pixiv.net/*"],
-            "js": ["lib/namespace.js", "lib/extension-util.js", "lib/jszip.min.js", "lib/gif.js", "lib/apng.js", "lib/webp.js", "lib/px-content.js", "lib/px-content-whitecube.js", "js/content.js"],
+            "js": ["lib/namespace.js", "lib/extension-util.js", "lib/jszip.min.js", "lib/gif.js", "lib/apng.js", "lib/webp.js", "lib/px-content.js", "js/content.js"],
             "run_at": "document_start"
         }
     ],
@@ -36,6 +36,7 @@
         "cookies",
         "storage",
         "downloads",
-        "*://*.pixiv.net/"
+        "*://*.pixiv.net/",
+        "*://*.pximg.net/"
     ]
 }

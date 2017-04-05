@@ -1,4 +1,4 @@
-/* global PxContent, PxContentWhitecube */
+/* global PxContent */
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -6,12 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function start() {
         const pxContent = new PxContent();
-        const pxContentWhitecube = new PxContentWhitecube();
 
         if (pxContent.check()) {
             pxContent.init();
-        } else if (pxContentWhitecube.check()) {
-            pxContentWhitecube.init();
         }
     }
 
