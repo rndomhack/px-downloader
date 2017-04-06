@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Px Downloader",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "description": "Download Pixiv images",
     "author": "rndomhack",
     "icons": {
@@ -32,8 +32,6 @@
         "chrome_style": true
     },
     "permissions": [
-        "tabs",
-        "cookies",
         "storage",
         "downloads",
         "*://*.pixiv.net/",

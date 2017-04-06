@@ -9,7 +9,7 @@
 <body>
     <div class="container" id="options">
         <div class="col-lg-6 col-md-12 col-sm-12">
-            <h2>設定</h2>
+            <h1>設定</h1>
             <label>ディレクトリ名</label>
             <input class="ui-full-width" type="text" id="dir">
             <label>ファイル名</label>
@@ -42,8 +42,20 @@
             <input class="ui-full-width" type="range" min="0" max="1" step="0.1" id="ugoiraQuality">
         </div>
         <div class="col-lg-6 col-md-12 col-sm-12">
-            <h2>説明</h2>
-            <h3>マクロ</h3>
+            <h1>説明</h1>
+            <h2>ディレクトリ名, ファイル名, ページ名</h2>
+            <p>ダウンロードフォルダ内に作成される、ディレクトリ名、ファイル名、ページ名(複数ファイル存在する場合)を指定します</p>
+            <h2>ファイルが既に存在した場合の処理</h2>
+            <p>同一名称のファイルが既に存在した場合の処理を指定します</p>
+            <h2>イラストの変換形式</h2>
+            <p>イラストの形式を変換してダウンロードできます</p>
+            <h2>イラストの変換品質</h2>
+            <p>イラストの形式を変換してダウンロードする場合の品質を変更できます(右に行くほど高品質)</p>
+            <h2>うごイラの形式</h2>
+            <p>うごイラの形式を指定できます</p>
+            <h2>うごイラの品質</h2>
+            <p>うごイラの品質を指定できます(右に行くほど高品質)</p>
+            <h2>マクロ</h2>
             <p>名前には以下のマクロが使用できます</p>
             <table class="ui-full-width">
                 <thead>
@@ -91,27 +103,27 @@
                     </tr>
                     <tr>
                         <td>${DD}</td>
-                        <td>投稿者の名前</td>
+                        <td>日にち(2桁)</td>
                     </tr>
                     <tr>
                         <td>${day}</td>
-                        <td>投稿者の名前</td>
+                        <td>曜日</td>
                     </tr>
                     <tr>
                         <td>${h}</td>
-                        <td>投稿者の名前</td>
+                        <td>時</td>
                     </tr>
                     <tr>
                         <td>${hh}</td>
-                        <td>投稿者の名前</td>
+                        <td>時(2桁)</td>
                     </tr>
                     <tr>
                         <td>${m}</td>
-                        <td>投稿者の名前</td>
+                        <td>分</td>
                     </tr>
                     <tr>
                         <td>${mm}</td>
-                        <td>投稿者の名前</td>
+                        <td>分(2桁)</td>
                     </tr>
                     <tr>
                         <td>${page}</td>
