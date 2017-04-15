@@ -21,7 +21,7 @@
         "message": "File conflicts action"
     },
     "optSettingsConflictActionUniquify": {
-        "message": "Uniquify"
+        "message": "Save with other name"
     },
     "optSettingsConflictActionOverwrite": {
         "message": "Overwrite"
