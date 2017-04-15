@@ -1,8 +1,12 @@
-/* global ExtensionUtil */
+/* global browser, ExtensionUtil */
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
     const util = new ExtensionUtil();
+
+    Array.from(document.querySelectorAll("[i18n]")).forEach(elem => {
+        elem.textContent = browser.i18n.getMessage(`opt${elem.getAttribute("i18n").replace(/^[a-z]/, str => str.toUpperCase())}`);
+    });
 
     util.getOptions([
         "dir",

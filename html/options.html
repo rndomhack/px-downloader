@@ -9,137 +9,125 @@
 <body>
     <div class="container" id="options">
         <div class="col-lg-6 col-md-12 col-sm-12">
-            <h1>設定</h1>
-            <label>ディレクトリ名</label>
+            <h1 i18n="settings"></h1>
+            <label i18n="settingsDir"></label>
             <input class="ui-full-width" type="text" id="dir">
-            <label>ファイル名</label>
+            <label i18n="settingsFile"></label>
             <input class="ui-full-width" type="text" id="file">
-            <label>ページ名</label>
+            <label i18n="settingsPage"></label>
             <input class="ui-full-width" type="text" id="page">
-            <label>ファイルが既に存在した場合の処理</label>
+            <label i18n="settingsConflictAction"></label>
             <select class="ui-full-width" id="conflictAction">
-                <option value="uniquify">別名で保存する</option>
-                <option value="overwrite">上書きする</option>
-                <option value="prompt">プロンプトを出す</option>
+                <option i18n="settingsConflictActionUniquify" value="uniquify"></option>
+                <option i18n="settingsConflictActionOverwrite" value="overwrite"></option>
+                <option i18n="settingsConflictActionPrompt" value="prompt"></option>
             </select>
-            <label>イラストの変換形式</label>
+            <label i18n="settingsConvertMode"></label>
             <select class="ui-full-width" id="convertMode">
-                <option value="none">なし</option>
+                <option value="none">None</option>
                 <option value="jpeg">Jpeg</option>
                 <option value="png">Png</option>
                 <option value="webp">WebP</option>
             </select>
-            <label>イラストの変換品質</label>
+            <label i18n="settingsConvertQuality"></label>
             <input class="ui-full-width" type="range" min="0" max="1" step="0.1" id="convertQuality">
-            <label>うごイラの形式</label>
+            <label i18n="settingsUgoiraMode"></label>
             <select class="ui-full-width" id="ugoiraMode">
-                <option value="zip">Zip</option>
+                <option value="zip">None(Zip)</option>
                 <option value="gif">Gif</option>
                 <option value="apng">APng</option>
                 <option value="webp">WebP</option>
             </select>
-            <label>うごイラの品質</label>
+            <label i18n="settingsUgoiraQuality"></label>
             <input class="ui-full-width" type="range" min="0" max="1" step="0.1" id="ugoiraQuality">
         </div>
         <div class="col-lg-6 col-md-12 col-sm-12">
-            <h1>説明</h1>
-            <h2>ディレクトリ名, ファイル名, ページ名</h2>
-            <p>ダウンロードフォルダ内に作成される、ディレクトリ名、ファイル名、ページ名(複数ファイル存在する場合)を指定します</p>
-            <h2>ファイルが既に存在した場合の処理</h2>
-            <p>同一名称のファイルが既に存在した場合の処理を指定します</p>
-            <h2>イラストの変換形式</h2>
-            <p>イラストの形式を変換してダウンロードできます</p>
-            <h2>イラストの変換品質</h2>
-            <p>イラストの形式を変換してダウンロードする場合の品質を変更できます(右に行くほど高品質)</p>
-            <h2>うごイラの形式</h2>
-            <p>うごイラの形式を指定できます</p>
-            <h2>うごイラの品質</h2>
-            <p>うごイラの品質を指定できます(右に行くほど高品質)</p>
-            <h2>マクロ</h2>
-            <p>名前には以下のマクロが使用できます</p>
+            <h1 i18n="description"></h1>
+            <h2 i18n="descriptionMacros"></h2>
+            <p i18n="descriptionMacrosDescription"></p>
             <table class="ui-full-width">
                 <thead>
                     <tr>
-                        <th>マクロ</th>
-                        <th>説明</th>
+                        <th i18n="descriptionMacrosListMacros"></th>
+                        <th i18n="descriptionMacrosListDescription"></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>${id}</td>
-                        <td>イラスト/ノベルのID</td>
+                        <td i18n="descriptionMacrosList_id"></td>
                     </tr>
                     <tr>
                         <td>${title}</td>
-                        <td>イラスト/ノベルのタイトル</td>
+                        <td i18n="descriptionMacrosList_title"></td>
                     </tr>
                     <tr>
                         <td>${userId}</td>
-                        <td>投稿者のID</td>
+                        <td i18n="descriptionMacrosList_userId"></td>
                     </tr>
                     <tr>
                         <td>${userName}</td>
-                        <td>投稿者の名前</td>
+                        <td i18n="descriptionMacrosList_userName"></td>
                     </tr>
                     <tr>
                         <td>${YYYY}</td>
-                        <td>年</td>
+                        <td i18n="descriptionMacrosList_YYYY"></td>
                     </tr>
                     <tr>
                         <td>${YY}</td>
-                        <td>年(2桁)</td>
+                        <td i18n="descriptionMacrosList_YY"></td>
                     </tr>
                     <tr>
                         <td>${M}</td>
-                        <td>月</td>
+                        <td i18n="descriptionMacrosList_M"></td>
                     </tr>
                     <tr>
                         <td>${MM}</td>
-                        <td>月(2桁)</td>
+                        <td i18n="descriptionMacrosList_MM"></td>
                     </tr>
                     <tr>
                         <td>${D}</td>
-                        <td>日にち</td>
+                        <td i18n="descriptionMacrosList_D"></td>
                     </tr>
                     <tr>
                         <td>${DD}</td>
-                        <td>日にち(2桁)</td>
+                        <td i18n="descriptionMacrosList_DD"></td>
                     </tr>
                     <tr>
-                        <td>${day}</td>
-                        <td>曜日</td>
+                        <td>${weekday}</td>
+                        <td i18n="descriptionMacrosList_weekday"></td>
                     </tr>
                     <tr>
                         <td>${h}</td>
-                        <td>時</td>
+                        <td i18n="descriptionMacrosList_h"></td>
                     </tr>
                     <tr>
                         <td>${hh}</td>
-                        <td>時(2桁)</td>
+                        <td i18n="descriptionMacrosList_hh"></td>
                     </tr>
                     <tr>
                         <td>${m}</td>
-                        <td>分</td>
+                        <td i18n="descriptionMacrosList_m"></td>
                     </tr>
                     <tr>
                         <td>${mm}</td>
-                        <td>分(2桁)</td>
+                        <td i18n="descriptionMacrosList_mm"></td>
                     </tr>
                     <tr>
                         <td>${page}</td>
-                        <td>ページ数 *ページ名のみ</td>
+                        <td i18n="descriptionMacrosList_page"></td>
                     </tr>
                     <tr>
                         <td>${page2}</td>
-                        <td>ページ数(2桁) *ページ名のみ</td>
+                        <td i18n="descriptionMacrosList_page2"></td>
                     </tr>
                     <tr>
                         <td>${page3}</td>
-                        <td>ページ数(3桁) *ページ名のみ</td>
+                        <td i18n="descriptionMacrosList_page3"></td>
                     </tr>
                     <tr>
                         <td>${page4}</td>
-                        <td>ページ数(4桁) *ページ名のみ</td>
+                        <td i18n="descriptionMacrosList_page4"></td>
                     </tr>
                 </tbody>
             </table>
