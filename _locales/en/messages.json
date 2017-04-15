@@ -1,6 +1,6 @@
 {
     "extDescription": {
-        "message": "Download illust, manga, ugoira(animations) and novels from Pixiv"
+        "message": "Download illust, manga, ugoira(animation) and novel from Pixiv"
     },
     "weekdays": {
         "message": "Sun,Mon,Tue,Wed,Thu,Fri,Sat"
@@ -18,7 +18,7 @@
         "message": "Page name"
     },
     "optSettingsConflictAction": {
-        "message": "File name Conflict Action"
+        "message": "File conflicts action"
     },
     "optSettingsConflictActionUniquify": {
         "message": "Uniquify"
