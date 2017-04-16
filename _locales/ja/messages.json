@@ -21,7 +21,7 @@
         "message": "ファイルが既に存在した場合の処理"
     },
     "optSettingsForceFilename": {
-        "message": "ファイル名の変更を強制する"
+        "message": "ファイル名をタイトルに従って様に強制する"
     },
     "optSettingsConflictActionUniquify": {
         "message": "別名で保存する"
