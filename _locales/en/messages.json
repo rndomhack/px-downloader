@@ -21,7 +21,7 @@
         "message": "File conflicts action"
     },
     "optSettingsForceFilename": {
-        "message": "Force browser to change filename"
+        "message": "Ensure filename follows title (default: off)"
     },
     "optSettingsConflictActionUniquify": {
         "message": "Save with other name"
