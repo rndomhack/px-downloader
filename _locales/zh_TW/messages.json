@@ -21,7 +21,7 @@
         "message": "出現檔案衝突時的處理"
     },
     "optSettingsForceFilename": {
-        "message": "Force browser to change filename"
+        "message": "確保檔名依從標題 (預設:關)"
     },
     "optSettingsConflictActionUniquify": {
         "message": "另存新檔"
