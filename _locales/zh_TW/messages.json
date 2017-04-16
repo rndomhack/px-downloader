@@ -21,7 +21,7 @@
         "message": "出現檔案衝突時的處理"
     },
     "optSettingsForceFilename": {
-        "message": "確保檔名依從標題 (預設:關)"
+        "message": "確保檔名依從標題 (預設:關,要重新啟動)"
     },
     "optSettingsConflictActionUniquify": {
         "message": "另存新檔"
