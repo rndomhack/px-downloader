@@ -9,9 +9,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     util.getOptions([
-        "dir",
-        "file",
-        "page",
+        "dirname",
+        "filename",
+        "pagename",
         "conflictAction",
         "forceFilename",
         "convertMode",
@@ -23,16 +23,16 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelector(`#${key}`).value = options[key];
         });
 
-        document.querySelector("#dir").addEventListener("change", ev => {
-            util.setOptions({ dir: ev.currentTarget.value });
+        document.querySelector("#dirname").addEventListener("change", ev => {
+            util.setOptions({ dirname: ev.currentTarget.value });
         });
 
-        document.querySelector("#file").addEventListener("change", ev => {
-            util.setOptions({ file: ev.currentTarget.value });
+        document.querySelector("#filename").addEventListener("change", ev => {
+            util.setOptions({ filename: ev.currentTarget.value });
         });
 
-        document.querySelector("#page").addEventListener("change", ev => {
-            util.setOptions({ page: ev.currentTarget.value });
+        document.querySelector("#pagename").addEventListener("change", ev => {
+            util.setOptions({ pagename: ev.currentTarget.value });
         });
 
         document.querySelector("#conflictAction").addEventListener("change", ev => {

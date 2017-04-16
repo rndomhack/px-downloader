@@ -8,13 +8,13 @@
     "optSettings": {
         "message": "設定"
     },
-    "optSettingsDir": {
+    "optSettingsDirname": {
         "message": "目錄名稱"
     },
-    "optSettingsFile": {
+    "optSettingsFilename": {
         "message": "檔案名稱"
     },
-    "optSettingsPage": {
+    "optSettingsPagename": {
         "message": "頁面名稱"
     },
     "optSettingsConflictAction": {

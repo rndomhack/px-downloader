@@ -8,13 +8,13 @@
     "optSettings": {
         "message": "Settings"
     },
-    "optSettingsDir": {
+    "optSettingsDirname": {
         "message": "Directory name"
     },
-    "optSettingsFile": {
+    "optSettingsFilename": {
         "message": "File name"
     },
-    "optSettingsPage": {
+    "optSettingsPagename": {
         "message": "Page name"
     },
     "optSettingsConflictAction": {
