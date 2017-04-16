@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "file",
         "page",
         "conflictAction",
+        "forceFilename",
         "convertMode",
         "convertQuality",
         "ugoiraMode",
@@ -38,12 +39,16 @@ document.addEventListener("DOMContentLoaded", () => {
             util.setOptions({ conflictAction: ev.currentTarget.value });
         });
 
+        document.querySelector("#forceFilename").addEventListener("change", ev => {
+            util.setOptions({ forceFilename: Number.parseInt(ev.currentTarget.value, 10) });
+        });
+
         document.querySelector("#convertMode").addEventListener("change", ev => {
             util.setOptions({ convertMode: ev.currentTarget.value });
         });
 
         document.querySelector("#convertQuality").addEventListener("change", ev => {
-            util.setOptions({ convertQuality: parseFloat(ev.currentTarget.value) });
+            util.setOptions({ convertQuality: Number.parseFloat(ev.currentTarget.value) });
         });
 
         document.querySelector("#ugoiraMode").addEventListener("change", ev => {
@@ -51,10 +56,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         document.querySelector("#ugoiraQuality").addEventListener("change", ev => {
-            util.setOptions({ ugoiraQuality: parseFloat(ev.currentTarget.value) });
+            util.setOptions({ ugoiraQuality: Number.parseFloat(ev.currentTarget.value) });
         });
 
         if (util.browser !== "chrome") {
+            document.querySelector("#options div").removeChild(document.querySelector("[i18n='settingsForceFilename']"));
+            document.querySelector("#options div").removeChild(document.querySelector("#forceFilename"));
             document.querySelector("#convertMode").removeChild(document.querySelector("#convertMode option[value='webp']"));
             document.querySelector("#ugoiraMode").removeChild(document.querySelector("#ugoiraMode option[value='webp']"));
         }

@@ -20,6 +20,9 @@
     "optSettingsConflictAction": {
         "message": "出現檔案衝突時的處理"
     },
+    "optSettingsForceFilename": {
+        "message": "Force browser to change filename"
+    },
     "optSettingsConflictActionUniquify": {
         "message": "另存新檔"
     },
