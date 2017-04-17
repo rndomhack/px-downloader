@@ -9,19 +9,19 @@
         "message": "設定"
     },
     "optSettingsReset": {
-        "message": "Reset settings"
+        "message": "回復預設值"
     },
     "optSettingsSingleFilename": {
-        "message": "檔案名稱"
+        "message": "檔案名稱(單一檔案用)"
     },
     "optSettingsMultiFilename": {
-        "message": "頁面名稱"
+        "message": "檔案名稱(複數檔案用)"
     },
     "optSettingsConflictAction": {
         "message": "出現檔案衝突時的處理"
     },
     "optSettingsForceFilename": {
-        "message": "確保檔名依從標題 (預設:關,要重新啟動)"
+        "message": "確保檔名依從標題 (要重新啟動)"
     },
     "optSettingsConflictActionUniquify": {
         "message": "另存新檔"
