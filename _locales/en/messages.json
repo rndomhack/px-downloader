@@ -21,7 +21,7 @@
         "message": "File conflicts action"
     },
     "optSettingsForceFilename": {
-        "message": "Ensure filename follows title (default: off, need restart)"
+        "message": "Ensure filename follows title (need restart)"
     },
     "optSettingsConflictActionUniquify": {
         "message": "Save with other name"
