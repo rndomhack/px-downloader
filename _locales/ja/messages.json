@@ -8,14 +8,14 @@
     "optSettings": {
         "message": "設定"
     },
-    "optSettingsDirname": {
-        "message": "ディレクトリ名"
+    "optSettingsReset": {
+        "message": "設定をリセット"
     },
-    "optSettingsFilename": {
-        "message": "ファイル名"
+    "optSettingsSingleFilename": {
+        "message": "ファイル名(単一ファイル)"
     },
-    "optSettingsPagename": {
-        "message": "ページ名"
+    "optSettingsMultiFilename": {
+        "message": "ファイル名(複数ファイル)"
     },
     "optSettingsConflictAction": {
         "message": "ファイルが既に存在した場合の処理"

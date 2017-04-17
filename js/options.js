@@ -8,10 +8,37 @@ document.addEventListener("DOMContentLoaded", () => {
         elem.textContent = browser.i18n.getMessage(`opt${elem.getAttribute("i18n").replace(/^[a-z]/, str => str.toUpperCase())}`);
     });
 
+    document.querySelector("#reset").addEventListener("click", () => {
+        util.setOptions({
+            singleFilename: "PxDownloader/${userName}(${userId})/${title}(${id})",
+            multiFilename: "PxDownloader/${userName}(${userId})/${title}(${id})/${page2}",
+            conflictAction: "uniquify",
+            forceFilename: 0,
+            convertMode: "none",
+            convertQuality: 0.9,
+            ugoiraMode: "gif",
+            ugoiraQuality: 0.9
+        }).then(() => {
+            return util.getOptions([
+                "singleFilename",
+                "multiFilename",
+                "conflictAction",
+                "forceFilename",
+                "convertMode",
+                "convertQuality",
+                "ugoiraMode",
+                "ugoiraQuality"
+            ]);
+        }).then(options => {
+            Object.keys(options).forEach(key => {
+                document.querySelector(`#${key}`).value = options[key];
+            });
+        });
+    });
+
     util.getOptions([
-        "dirname",
-        "filename",
-        "pagename",
+        "singleFilename",
+        "multiFilename",
         "conflictAction",
         "forceFilename",
         "convertMode",
@@ -23,16 +50,12 @@ document.addEventListener("DOMContentLoaded", () => {
             document.querySelector(`#${key}`).value = options[key];
         });
 
-        document.querySelector("#dirname").addEventListener("change", ev => {
-            util.setOptions({ dirname: ev.currentTarget.value });
+        document.querySelector("#singleFilename").addEventListener("change", ev => {
+            util.setOptions({ singleFilename: ev.currentTarget.value });
         });
 
-        document.querySelector("#filename").addEventListener("change", ev => {
-            util.setOptions({ filename: ev.currentTarget.value });
-        });
-
-        document.querySelector("#pagename").addEventListener("change", ev => {
-            util.setOptions({ pagename: ev.currentTarget.value });
+        document.querySelector("#multiFilename").addEventListener("change", ev => {
+            util.setOptions({ multiFilename: ev.currentTarget.value });
         });
 
         document.querySelector("#conflictAction").addEventListener("change", ev => {
@@ -60,10 +83,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (util.browser !== "chrome") {
-            document.querySelector("#options div").removeChild(document.querySelector("[i18n='settingsForceFilename']"));
-            document.querySelector("#options div").removeChild(document.querySelector("#forceFilename"));
-            document.querySelector("#convertMode").removeChild(document.querySelector("#convertMode option[value='webp']"));
-            document.querySelector("#ugoiraMode").removeChild(document.querySelector("#ugoiraMode option[value='webp']"));
+            document.querySelector("[i18n='settingsForceFilename']").style.display = "none";
+            document.querySelector("#forceFilename").style.display = "none";
+            document.querySelector("#convertMode option[value='webp']").style.display = "none";
+            document.querySelector("#ugoiraMode option[value='webp']").style.display = "none";
         }
     });
 });

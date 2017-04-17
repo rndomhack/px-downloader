@@ -8,14 +8,14 @@
     "optSettings": {
         "message": "Settings"
     },
-    "optSettingsDirname": {
-        "message": "Directory name"
+    "optSettingsReset": {
+        "message": "Reset settings"
     },
-    "optSettingsFilename": {
-        "message": "File name"
+    "optSettingsSingleFilename": {
+        "message": "Filename (single file)"
     },
-    "optSettingsPagename": {
-        "message": "Page name"
+    "optSettingsMultiFilename": {
+        "message": "Filename (multiple files)"
     },
     "optSettingsConflictAction": {
         "message": "File conflicts action"
