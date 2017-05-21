@@ -1,0 +1,149 @@
+{
+    "extDescription": {
+        "message": "Download illust, manga, ugoira(animation) and novel from Pixiv"
+    },
+    "weekdays": {
+        "message": "Sun,Mon,Tue,Wed,Thu,Fri,Sat"
+    },
+    "optSettings": {
+        "message": "Settings"
+    },
+    "optSettingsReset": {
+        "message": "Reset settings"
+    },
+    "optSettingsSingleFilename": {
+        "message": "Filename (single file)"
+    },
+    "optSettingsMultiFilename": {
+        "message": "Filename (multiple files)"
+    },
+    "optSettingsNovelFilename": {
+        "message": "Filename (novel)"
+    },
+    "optSettingsConflictAction": {
+        "message": "File conflicts action"
+    },
+    "optSettingsForceFilename": {
+        "message": "Ensure filename follows title (need restart)"
+    },
+    "optSettingsConflictActionUniquify": {
+        "message": "Save with other name"
+    },
+    "optSettingsConflictActionOverwrite": {
+        "message": "Overwrite"
+    },
+    "optSettingsConflictActionPrompt": {
+        "message": "Prompt"
+    },
+    "optSettingsConvertMode": {
+        "message": "Convert mode for illust"
+    },
+    "optSettingsConvertQuality": {
+        "message": "Convert quality for illust"
+    },
+    "optSettingsUgoiraMode": {
+        "message": "Convert mode for Ugoira(Animations)"
+    },
+    "optSettingsUgoiraQuality": {
+        "message": "Convert quality for Ugoira(Animations)"
+    },
+    "optDescription": {
+        "message": "Description"
+    },
+    "optDescriptionMacros": {
+        "message": "Macros"
+    },
+    "optDescriptionMacrosDescription": {
+        "message": "You can use the macros below as names for directory, file and page."
+    },
+    "optDescriptionMacrosListMacros": {
+        "message": "Macros"
+    },
+    "optDescriptionMacrosListDescription": {
+        "message": "Description"
+    },
+    "optDescriptionMacrosList_id": {
+        "message": "Illust ID"
+    },
+    "optDescriptionMacrosList_title": {
+        "message": "Illust title"
+    },
+    "optDescriptionMacrosList_userId": {
+        "message": "User ID"
+    },
+    "optDescriptionMacrosList_userName": {
+        "message": "User name"
+    },
+    "optDescriptionMacrosList_YYYY": {
+        "message": "Year"
+    },
+    "optDescriptionMacrosList_YY": {
+        "message": "Year(2 digits)"
+    },
+    "optDescriptionMacrosList_M": {
+        "message": "Month"
+    },
+    "optDescriptionMacrosList_MM": {
+        "message": "Month(2 digits)"
+    },
+    "optDescriptionMacrosList_D": {
+        "message": "Day"
+    },
+    "optDescriptionMacrosList_DD": {
+        "message": "Day(2 digits)"
+    },
+    "optDescriptionMacrosList_weekday": {
+        "message": "Weekday"
+    },
+    "optDescriptionMacrosList_h": {
+        "message": "Hours"
+    },
+    "optDescriptionMacrosList_hh": {
+        "message": "Hours(2 digits)"
+    },
+    "optDescriptionMacrosList_m": {
+        "message": "Minutes"
+    },
+    "optDescriptionMacrosList_mm": {
+        "message": "Minutes(2 digits)"
+    },
+    "optDescriptionMacrosList_page": {
+        "message": "Number of pages *Page only"
+    },
+    "optDescriptionMacrosList_page2": {
+        "message": "Number of pages(2 digits) *Page name only"
+    },
+    "optDescriptionMacrosList_page3": {
+        "message": "Number of pages(3 digits) *Page name only"
+    },
+    "optDescriptionMacrosList_page4": {
+        "message": "Number of pages(4 digits) *Page name only"
+    },
+    "phFetch": {
+        "message": "Fetch"
+    },
+    "phLoad": {
+        "message": "Load"
+    },
+    "phConvert": {
+        "message": "Convert"
+    },
+    "phProcess": {
+        "message": "Process"
+    },
+    "phDownload": {
+        "message": "Download"
+    },
+    "phDone": {
+        "message": "Done"
+    },
+    "phRetry": {
+        "message": "Retry"
+    },
+    "errGetPixiv": {
+        "message": "Can't find \"getPixiv\" element"
+    },
+    "errGetPage": {
+        "message": "Can't identify page"
+    }
+}

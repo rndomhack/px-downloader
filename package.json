@@ -1,0 +1,38 @@
+{
+  "name": "px-downloader",
+  "version": "3.0.0",
+  "description": "Download illust, manga, ugoira(animation) and novel from Pixiv",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "cd ./vendor/jszip && npm i && cd ../gif.js && npm i",
+    "build": "gulp build",
+    "clean": "gulp clean",
+    "scripts": "gulp scripts",
+    "libraries": "cd ./vendor/jszip && ./node_modules/.bin/grunt build && cd ../gif.js && ./bin/build && cd ../.. && gulp copy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rndomhack/px-downloader.git"
+  },
+  "keywords": [
+    "pixiv",
+    "ugoira"
+  ],
+  "author": "rndomhack",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rndomhack/px-downloader/issues"
+  },
+  "homepage": "https://github.com/rndomhack/px-downloader#readme",
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-env": "^1.4.0",
+    "del": "^2.2.2",
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-zip": "^4.0.0",
+    "vinyl-named": "^1.1.0",
+    "webpack": "^2.5.1",
+    "webpack-stream": "^3.2.0"
+  }
+}

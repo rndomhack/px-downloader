@@ -1,0 +1,11 @@
+{
+    "singleFilename": "PxDownloader/${userName}(${userId})/${title}(${id})",
+    "multiFilename": "PxDownloader/${userName}(${userId})/${title}(${id})/${page2}",
+    "novelFilename": "PxDownloader/${userName}(${userId})/${title}(${id})",
+    "conflictAction": "uniquify",
+    "forceFilename": 0,
+    "convertMode": "none",
+    "convertQuality": 0.9,
+    "ugoiraMode": "gif",
+    "ugoiraQuality": 0.9
+}

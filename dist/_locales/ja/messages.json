@@ -1,0 +1,149 @@
+{
+    "extDescription": {
+        "message": "Pixivからイラスト、漫画、うごイラ、小説をダウンロード"
+    },
+    "weekdays": {
+        "message": "日,月,火,水,木,金,土"
+    },
+    "optSettings": {
+        "message": "設定"
+    },
+    "optSettingsReset": {
+        "message": "設定をリセット"
+    },
+    "optSettingsSingleFilename": {
+        "message": "ファイル名(単一ファイル)"
+    },
+    "optSettingsMultiFilename": {
+        "message": "ファイル名(複数ファイル)"
+    },
+    "optSettingsNovelFilename": {
+        "message": "ファイル名(小説)"
+    },
+    "optSettingsConflictAction": {
+        "message": "ファイルが既に存在した場合の処理"
+    },
+    "optSettingsForceFilename": {
+        "message": "ファイル名を変更できない場合、変更を強制する(リロード必須)"
+    },
+    "optSettingsConflictActionUniquify": {
+        "message": "別名で保存する"
+    },
+    "optSettingsConflictActionOverwrite": {
+        "message": "上書きする"
+    },
+    "optSettingsConflictActionPrompt": {
+        "message": "プロンプトを出す"
+    },
+    "optSettingsConvertMode": {
+        "message": "イラストの変換形式"
+    },
+    "optSettingsConvertQuality": {
+        "message": "イラストの変換品質"
+    },
+    "optSettingsUgoiraMode": {
+        "message": "うごイラの変換形式"
+    },
+    "optSettingsUgoiraQuality": {
+        "message": "うごイラの変換品質"
+    },
+    "optDescription": {
+        "message": "説明"
+    },
+    "optDescriptionMacros": {
+        "message": "マクロ"
+    },
+    "optDescriptionMacrosDescription": {
+        "message": "ディレクトリ名、ファイル名、ページ名には以下のマクロが使用できます。"
+    },
+    "optDescriptionMacrosListMacros": {
+        "message": "マクロ"
+    },
+    "optDescriptionMacrosListDescription": {
+        "message": "説明"
+    },
+    "optDescriptionMacrosList_id": {
+        "message": "イラストID"
+    },
+    "optDescriptionMacrosList_title": {
+        "message": "イラストタイトル"
+    },
+    "optDescriptionMacrosList_userId": {
+        "message": "ユーザーID"
+    },
+    "optDescriptionMacrosList_userName": {
+        "message": "ユーザー名"
+    },
+    "optDescriptionMacrosList_YYYY": {
+        "message": "年"
+    },
+    "optDescriptionMacrosList_YY": {
+        "message": "年(2桁)"
+    },
+    "optDescriptionMacrosList_M": {
+        "message": "月"
+    },
+    "optDescriptionMacrosList_MM": {
+        "message": "月(2桁)"
+    },
+    "optDescriptionMacrosList_D": {
+        "message": "日"
+    },
+    "optDescriptionMacrosList_DD": {
+        "message": "日(2桁)"
+    },
+    "optDescriptionMacrosList_weekday": {
+        "message": "曜日"
+    },
+    "optDescriptionMacrosList_h": {
+        "message": "時"
+    },
+    "optDescriptionMacrosList_hh": {
+        "message": "時(2桁)"
+    },
+    "optDescriptionMacrosList_m": {
+        "message": "分"
+    },
+    "optDescriptionMacrosList_mm": {
+        "message": "分(2桁)"
+    },
+    "optDescriptionMacrosList_page": {
+        "message": "ページ数 *ページ名のみ"
+    },
+    "optDescriptionMacrosList_page2": {
+        "message": "ページ数(2桁) *ページ名のみ"
+    },
+    "optDescriptionMacrosList_page3": {
+        "message": "ページ数(3桁) *ページ名のみ"
+    },
+    "optDescriptionMacrosList_page4": {
+        "message": "ページ数(4桁) *ページ名のみ"
+    },
+    "phFetch": {
+        "message": "取得"
+    },
+    "phLoad": {
+        "message": "読み込み"
+    },
+    "phConvert": {
+        "message": "変換"
+    },
+    "phProcess": {
+        "message": "処理"
+    },
+    "phDownload": {
+        "message": "ダウンロード"
+    },
+    "phDone": {
+        "message": "完了"
+    },
+    "phRetry": {
+        "message": "リトライ"
+    },
+    "errGetPixiv": {
+        "message": "\"getPixiv\" 要素が見つかりません"
+    },
+    "errGetPage": {
+        "message": "ページを識別できません"
+    }
+}
