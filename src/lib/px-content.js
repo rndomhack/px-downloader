@@ -77,6 +77,8 @@ export default class PxContent {
         if (document.querySelector(".works_display")) {
             if (document.querySelector(".works_display ._ugoku-illust-player-container")) {
                 page = "ugoira";
+            } else if (document.querySelector(".works_display ._work.multiple.rtl, .works_display ._work.multiple.ltr")) {
+                page = "book";
             } else if (document.querySelector(".works_display ._work.multiple")) {
                 page = "multiple";
             } else if (document.querySelector(".works_display ._work.manga")) {
@@ -251,6 +253,12 @@ export default class PxContent {
                 break;
             }
 
+            case "book": {
+                await this.downloadBook(options);
+
+                break;
+            }
+
             case "manga": {
                 await this.downloadManga(options);
 
@@ -297,37 +305,80 @@ export default class PxContent {
         });
     }
 
-    async downloadManga(options) {
+    async downloadMultiple(options) {
         this.button.textContent = browser.i18n.getMessage("phFetch");
 
-        const pageUrl = new URL(document.querySelector(".works_display ._work.manga").getAttribute("href"), location.href);
-        const pageText = await this.util.fetch({ url: pageUrl, type: "text", init: { credentials: "include", referrer: location.href } });
-        const pageDomParser = new DOMParser();
-        const pageDocument = pageDomParser.parseFromString(pageText, "text/html");
+        const firstPageUrl = new URL(document.querySelector(".works_display ._work.multiple").getAttribute("href"), location.href);
+        const firstPageText = await this.util.fetch({ url: firstPageUrl, type: "text", init: { credentials: "include", referrer: location.href } });
+        const firstPageDomParser = new DOMParser();
+        const firstPageDocument = firstPageDomParser.parseFromString(firstPageText, "text/html");
+        const firstPageFullSizeContainerElements = Array.from(firstPageDocument.querySelectorAll("a.full-size-container"));
 
-        const imageUrl = pageDocument.querySelector("img").getAttribute("src");
-        let imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: pageUrl } });
+        const secondPageUrls = [];
+
+        for (const firstPageFullSizeContainerElement of firstPageFullSizeContainerElements) {
+            secondPageUrls.push(new URL(firstPageFullSizeContainerElement.getAttribute("href"), firstPageUrl).href);
+        }
+
+        const imageUrls = [];
+
+        for (const secondPageUrl of secondPageUrls) {
+            const secondPageText = await this.util.fetch({ url: secondPageUrl, type: "text", init: { credentials: "include", referrer: location.href } });
+            const secondPageDomParser = new DOMParser();
+            const secondPageDocument = secondPageDomParser.parseFromString(secondPageText, "text/html");
+
+            imageUrls.push(new URL(secondPageDocument.querySelector("img").getAttribute("src"), secondPageUrl).href);
+        }
+
+        let imageBlobs = [];
+
+        for (let i = 0; i < imageUrls.length; i++) {
+            const imageUrl = imageUrls[i];
+            const imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: secondPageUrls[i] } });
+
+            this.button.textContent = `${browser.i18n.getMessage("phFetch")}: ${Math.floor(((i + 1) / imageUrls.length) * 100)}%`;
+
+            imageBlobs.push(imageBlob);
+        }
 
         if (options.convertMode !== "none") {
             this.button.textContent = browser.i18n.getMessage("phConvert");
 
-            imageBlob = await this.convert({
-                blob: imageBlob,
-                type: `image/${options.convertMode}`,
-                quality: options.convertQuality
-            });
+            const convertedImageBlobs = [];
+
+            for (let i = 0; i < imageBlobs.length; i++) {
+                const imageBlob = imageBlobs[i];
+
+                const convertedImageBlob = await this.convert({
+                    blob: imageBlob,
+                    type: `image/${options.convertMode}`,
+                    quality: options.convertQuality
+                });
+
+                this.button.textContent = `${browser.i18n.getMessage("phConvert")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`;
+
+                convertedImageBlobs.push(convertedImageBlob);
+            }
+
+            imageBlobs = convertedImageBlobs;
         }
 
         this.button.textContent = browser.i18n.getMessage("phDownload");
 
-        await this.download({
-            blob: imageBlob,
-            filename: this.getFilename({ singleFilename: options.singleFilename, ext: this.getExt(imageBlob) }),
-            conflictAction: options.conflictAction
-        });
+        for (let i = 0; i < imageBlobs.length; i++) {
+            const imageBlob = imageBlobs[i];
+
+            await this.download({
+                blob: imageBlob,
+                filename: this.getFilename({ multiFilename: options.multiFilename, index: i, ext: this.getExt(imageBlob) }),
+                conflictAction: options.conflictAction
+            });
+
+            this.button.textContent = `${browser.i18n.getMessage("phDownload")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`;
+        }
     }
 
-    async downloadMultiple(options) {
+    async downloadBook(options) {
         this.button.textContent = browser.i18n.getMessage("phFetch");
 
         const pageUrl = new URL(document.querySelector(".works_display ._work.multiple").getAttribute("href"), location.href);
@@ -339,7 +390,7 @@ export default class PxContent {
         const imageUrls = [];
 
         for (const pageScriptElement of pageScriptElements) {
-            const match = pageScriptElement.textContent.match(/pixiv\.context\.images\[(\d+)\] = (".+?")/);
+            const match = pageScriptElement.textContent.match(/pixiv\.context\.originalImages\[(\d+)\] = (".+?")/);
 
             if (match === null) continue;
 
@@ -392,6 +443,36 @@ export default class PxContent {
 
             this.button.textContent = `${browser.i18n.getMessage("phDownload")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`;
         }
+    }
+
+    async downloadManga(options) {
+        this.button.textContent = browser.i18n.getMessage("phFetch");
+
+        const pageUrl = new URL(document.querySelector(".works_display ._work.manga").getAttribute("href"), location.href);
+        const pageText = await this.util.fetch({ url: pageUrl, type: "text", init: { credentials: "include", referrer: location.href } });
+        const pageDomParser = new DOMParser();
+        const pageDocument = pageDomParser.parseFromString(pageText, "text/html");
+
+        const imageUrl = pageDocument.querySelector("img").getAttribute("src");
+        let imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: pageUrl } });
+
+        if (options.convertMode !== "none") {
+            this.button.textContent = browser.i18n.getMessage("phConvert");
+
+            imageBlob = await this.convert({
+                blob: imageBlob,
+                type: `image/${options.convertMode}`,
+                quality: options.convertQuality
+            });
+        }
+
+        this.button.textContent = browser.i18n.getMessage("phDownload");
+
+        await this.download({
+            blob: imageBlob,
+            filename: this.getFilename({ singleFilename: options.singleFilename, ext: this.getExt(imageBlob) }),
+            conflictAction: options.conflictAction
+        });
     }
 
     async downloadUgoira(options) {
