@@ -25,39 +25,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     for (const [key, value] of Object.entries(options)) {
         document.querySelector(`#${key}`).value = value;
+
+        switch (typeof value) {
+            case "string": {
+                document.querySelector(`#${key}`).addEventListener("change", ev => {
+                    util.setOptions({ [key]: ev.currentTarget.value });
+                });
+
+                break;
+            }
+
+            case "number": {
+                document.querySelector(`#${key}`).addEventListener("change", ev => {
+                    util.setOptions({ [key]: Number.parseFloat(ev.currentTarget.value) });
+                });
+
+                break;
+            }
+        }
     }
-
-    document.querySelector("#singleFilename").addEventListener("change", ev => {
-        util.setOptions({ singleFilename: ev.currentTarget.value });
-    });
-
-    document.querySelector("#multiFilename").addEventListener("change", ev => {
-        util.setOptions({ multiFilename: ev.currentTarget.value });
-    });
-
-    document.querySelector("#conflictAction").addEventListener("change", ev => {
-        util.setOptions({ conflictAction: ev.currentTarget.value });
-    });
-
-    document.querySelector("#forceFilename").addEventListener("change", ev => {
-        util.setOptions({ forceFilename: Number.parseInt(ev.currentTarget.value, 10) });
-    });
-
-    document.querySelector("#convertMode").addEventListener("change", ev => {
-        util.setOptions({ convertMode: ev.currentTarget.value });
-    });
-
-    document.querySelector("#convertQuality").addEventListener("change", ev => {
-        util.setOptions({ convertQuality: Number.parseFloat(ev.currentTarget.value) });
-    });
-
-    document.querySelector("#ugoiraMode").addEventListener("change", ev => {
-        util.setOptions({ ugoiraMode: ev.currentTarget.value });
-    });
-
-    document.querySelector("#ugoiraQuality").addEventListener("change", ev => {
-        util.setOptions({ ugoiraQuality: Number.parseFloat(ev.currentTarget.value) });
-    });
 
     if (util.browser !== "chrome") {
         document.querySelector("[i18n='settingsForceFilename']").style.display = "none";
