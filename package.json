@@ -1,10 +1,11 @@
 {
   "name": "px-downloader",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "description": "Download illust, manga, ugoira(animation) and novel from Pixiv",
   "main": "index.js",
   "scripts": {
     "postinstall": "cd ./vendor/jszip && npm i && cd ../gif.js && npm i",
+    "watch": "gulp watch",
     "build": "gulp build",
     "clean": "gulp clean",
     "scripts": "gulp scripts",

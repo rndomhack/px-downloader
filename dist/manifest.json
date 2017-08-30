@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Px Downloader",
-    "version": "3.1.1",
+    "version": "3.2.0",
     "default_locale": "en",
     "description": "__MSG_extDescription__",
     "author": "rndomhack",
@@ -24,6 +24,7 @@
     "content_scripts": [
         {
             "matches": ["*://*.pixiv.net/*"],
+            "css": ["css/content.css"],
             "js": ["lib/browser.js", "lib/jszip.min.js", "lib/gif.js", "js/content.js"],
             "run_at": "document_start"
         }

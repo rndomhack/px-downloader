@@ -1,3 +1,5 @@
+import { EventEmitter } from "events";
+
 import browser from "browser";
 import JSZip from "jszip";
 import GIF from "gifjs";
@@ -7,6 +9,14 @@ import Apng from "./apng";
 import Webp from "./webp";
 
 import defaultOptions from "./default-options";
+
+function sleep(msec) {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve();
+        }, msec);
+    });
+}
 
 function getImageElement(url) {
     return new Promise((resolve, reject) => {
@@ -24,129 +34,195 @@ function getImageElement(url) {
     });
 }
 
-export default class PxContent {
-    init() {
-        this.util = new ExtensionUtil();
+export default class PxContent extends EventEmitter {
+    constructor({url, doc} = {}) {
+        super();
 
-        this.getPixiv();
-        this.getPage();
-        this.getMacro();
-        this.addButton();
+        this.util = new ExtensionUtil();
+        this.url = new URL(url || location.href);
+        this.document = doc || document;
+
+        this.page = this.getPage();
+        this.pixiv = this.getPixiv();
+        this.macro = this.getMacro();
     }
 
     check() {
-        if (location.pathname === "/member_illust.php" && new URLSearchParams(location.search.slice(1)).get("mode") === "medium") return true;
-        if (location.pathname === "/novel/show.php") return true;
-
-        return false;
-    }
-
-    getPixiv() {
-        const script = document.createElement("script");
-
-        script.textContent = `
-            (() => {
-                let div = document.createElement("div");
-
-                div.setAttribute("id", "getPixiv");
-                div.style.display = "none"
-                div.textContent = JSON.stringify({
-                    context: typeof pixiv === "undefined" ? null : pixiv.context
-                });
-
-                document.body.appendChild(div);
-            })();
-        `;
-
-        document.body.appendChild(script);
-
-        const div = document.querySelector("#getPixiv");
-
-        if (div === null) {
-            throw new Error(`getPixiv: ${browser.i18n.getMessage("errGetPixiv")}`);
-        }
-
-        const pixiv = JSON.parse(div.textContent);
-
-        this.pixiv = pixiv;
+        return this.page !== "";
     }
 
     getPage() {
         let page = "";
 
-        if (document.querySelector(".works_display")) {
-            if (document.querySelector(".works_display ._ugoku-illust-player-container")) {
+        if (this.url.pathname === "/member_illust.php" && this.url.searchParams.get("illust_id") !== null) {
+            if (this.document.querySelector(".works_display ._ugoku-illust-player-container") !== null) {
                 page = "ugoira";
-            } else if (document.querySelector(".works_display ._work.multiple.rtl, .works_display ._work.multiple.ltr")) {
+            } else if (this.document.querySelector(".works_display ._work.multiple.rtl, .works_display ._work.multiple.ltr") !== null) {
                 page = "book";
-            } else if (document.querySelector(".works_display ._work.multiple")) {
+            } else if (this.document.querySelector(".works_display ._work.multiple") !== null) {
                 page = "multiple";
-            } else if (document.querySelector(".works_display ._work.manga")) {
+            } else if (this.document.querySelector(".works_display ._work.manga") !== null) {
                 page = "manga";
             } else {
                 page = "illust";
             }
-        } else if (document.querySelector(".novel-content")) {
+        } else if (this.url.pathname === "/novel/show.php" && this.url.searchParams.get("id") !== null) {
             page = "novel";
-        } else {
-            throw new Error(`getPage: ${browser.i18n.getMessage("errGetPage")}`);
+        } else if (this.url.pathname === "/member_illust.php") {
+            page = "imageList";
+        } else if (/\/user\/\d+\/series\/\d+/.test(this.url.pathname)) {
+            page = "imageSeries";
+        } else if (this.url.pathname === "/novel/member.php") {
+            page = "novelList";
+        } else if (this.url.pathname === "/series.php" && this.url.searchParams.get("id") !== null) {
+            page = "novelSeries";
         }
 
-        this.page = page;
+        return page;
+    }
+
+    getPixiv() {
+        const pixiv = { context: {} };
+
+        const scriptElements = Array.from(this.document.querySelectorAll("script"));
+
+        for (const scriptElement of scriptElements) {
+            let match = null;
+
+            for (const key of ["illustId", "illustTitle", "userId", "userName"]) {
+                match = scriptElement.textContent.match(new RegExp(`pixiv\\.context\\.${key}[ \\t]*=[ \\t]*("(\\\\"|.)+?");`));
+
+                if (match === null) continue;
+
+                pixiv.context[key] = JSON.parse(match[1]);
+            }
+
+            for (const key of ["ugokuIllustData", "ugokuIllustFullscreenData"]) {
+                match = scriptElement.textContent.match(new RegExp(`pixiv\\.context\\.${key}[ \\t]*=[ \\t]*(.+?);`));
+
+                if (match === null) continue;
+
+                pixiv.context[key] = JSON.parse(match[1]);
+            }
+        }
+
+        return pixiv;
     }
 
     getMacro() {
         const macro = {};
 
-        macro.id = this.pixiv.context.illustId;
-        macro.title = this.pixiv.context.illustTitle || document.querySelector(".work-info").querySelector(".title").textContent;
-
-        macro.userId = this.pixiv.context.userId;
-        macro.userName = this.pixiv.context.userName || document.querySelector(".user").textContent;
-
-        const uiLang = document.querySelector(".languages .current").textContent.trim();
-        const dateString = document.querySelector(".meta").firstChild.textContent;
-
-        let dateArray, date;
-
-        switch (uiLang) {
-            case "日本語":
-            case "简体中文":
-            case "繁體中文": {
-                dateArray = dateString.replace(/ /g, "").split(/[年月日:]/).map(value => parseInt(value, 10));
-                date = new Date(dateArray[0], dateArray[1] - 1, dateArray[2], dateArray[3], dateArray[4]);
-
-                break;
-            }
-
-            case "English": {
-                dateArray = dateString.split(/[/ :]/).map(value => parseInt(value, 10));
-                date = new Date(dateArray[2], dateArray[0] - 1, dateArray[1], dateArray[3], dateArray[4]);
-
-                break;
-            }
-
-            case "한국어": {
-                dateArray = dateString.replace(/ /g, "").split(/[년월일:]/).map(value => parseInt(value, 10));
-                date = new Date(dateArray[0], dateArray[1] - 1, dateArray[2], dateArray[3], dateArray[4]);
-
-                break;
-            }
+        if (this.pixiv.context.hasOwnProperty("illustId")) {
+            macro.id = this.pixiv.context.illustId;
         }
 
-        macro.YYYY = date.getFullYear().toString();
-        macro.YY = date.getFullYear().toString().slice(-2);
-        macro.M = (date.getMonth() + 1).toString();
-        macro.MM = `0${date.getMonth() + 1}`.slice(-2);
-        macro.D = date.getDate().toString();
-        macro.DD = `0${date.getDate()}`.slice(-2);
-        macro.weekday = browser.i18n.getMessage("weekdays").split(",")[date.getDay()];
-        macro.h = date.getHours().toString();
-        macro.hh = `0${date.getHours()}`.slice(-2);
-        macro.m = date.getMinutes().toString();
-        macro.mm = `0${date.getMinutes()}`.slice(-2);
+        if (this.pixiv.context.hasOwnProperty("illustTitle")) {
+            macro.title = this.pixiv.context.illustTitle;
+        } else if (this.document.querySelector(".novel-headinfo .title") !== null) {
+            macro.title = this.document.querySelector(".novel-headinfo .title").textContent;
+        }
 
-        this.macro = macro;
+        if (this.pixiv.context.hasOwnProperty("userId")) {
+            macro.userId = this.pixiv.context.userId;
+        }
+
+        if (this.pixiv.context.hasOwnProperty("userName")) {
+            macro.userName = this.pixiv.context.userName;
+        } else if (this.document.querySelector(".novel-headinfo .author a") !== null) {
+            macro.userName = this.document.querySelector(".novel-headinfo .author a").textContent;
+        }
+
+        if (this.document.querySelector("._illust-series-title-text") !== null) {
+            const elem = this.document.querySelector("._illust-series-title-text");
+
+            macro.seriesName = elem.textContent;
+            macro.seriesId = elem.getAttribute("href").match(/\/user\/\d+\/series\/(\d+)/)[1];
+        } else if (document.querySelector(".type-series") !== null && document.querySelector(".type-series").parentNode.parentNode.querySelector(".area_title h3 a") !== null) {
+            const elem = document.querySelector(".type-series").parentNode.parentNode.querySelector(".area_title h3 a");
+
+            macro.seriesName = elem.textContent;
+            macro.seriesId = elem.getAttribute("href").match(/\/series\.php\?id=(\d+)/)[1];
+        }
+
+        if (this.document.querySelector(".languages .current") !== null && this.document.querySelector(".meta") !== null) {
+            const uiLang = this.document.querySelector(".languages .current").textContent.trim();
+            const dateString = this.document.querySelector(".meta").firstChild.textContent;
+
+            let dateArray, date;
+
+            switch (uiLang) {
+                case "日本語":
+                case "简体中文":
+                case "繁體中文": {
+                    dateArray = dateString.replace(/ /g, "").split(/[年月日:]/).map(value => parseInt(value, 10));
+                    date = new Date(dateArray[0], dateArray[1] - 1, dateArray[2], dateArray[3], dateArray[4]);
+
+                    break;
+                }
+
+                case "English": {
+                    dateArray = dateString.split(/[/ :]/).map(value => parseInt(value, 10));
+                    date = new Date(dateArray[2], dateArray[0] - 1, dateArray[1], dateArray[3], dateArray[4]);
+
+                    break;
+                }
+
+                case "한국어": {
+                    dateArray = dateString.replace(/ /g, "").split(/[년월일:]/).map(value => parseInt(value, 10));
+                    date = new Date(dateArray[0], dateArray[1] - 1, dateArray[2], dateArray[3], dateArray[4]);
+
+                    break;
+                }
+            }
+
+            macro.YYYY = date.getFullYear().toString();
+            macro.YY = date.getFullYear().toString().slice(-2);
+            macro.M = (date.getMonth() + 1).toString();
+            macro.MM = `0${date.getMonth() + 1}`.slice(-2);
+            macro.D = date.getDate().toString();
+            macro.DD = `0${date.getDate()}`.slice(-2);
+            macro.weekday = browser.i18n.getMessage("weekdays").split(",")[date.getDay()];
+            macro.h = date.getHours().toString();
+            macro.hh = `0${date.getHours()}`.slice(-2);
+            macro.m = date.getMinutes().toString();
+            macro.mm = `0${date.getMinutes()}`.slice(-2);
+        }
+
+        return macro;
+    }
+
+    getDownloaded() {
+        if (!this.macro.hasOwnProperty("id")) return false;
+
+        const value = localStorage.getItem("pxDownloaded");
+
+        if (value === null) return false;
+
+        const downloaded = JSON.parse(value);
+
+        if (!downloaded.includes(this.macro.id)) return false;
+
+        return true;
+    }
+
+    setDownloaded() {
+        let value = localStorage.getItem("pxDownloaded");
+
+        let downloaded = value === null ? [] : JSON.parse(value);
+
+        if (downloaded.includes(this.macro.id)) {
+            downloaded.splice(downloaded.indexOf(this.macro.id), 1);
+        }
+
+        downloaded.push(this.macro.id);
+
+        if (downloaded.length > 1000) {
+            downloaded = downloaded.slice(-1000);
+        }
+
+        value = JSON.stringify(downloaded);
+
+        localStorage.setItem("pxDownloaded", value);
     }
 
     getFilename(options) {
@@ -158,7 +234,7 @@ export default class PxContent {
             filename = `${this.replaceMacro(options.singleFilename)}.${options.ext}`;
         }
 
-        filename = filename.replace(/\/+/g, "/").replace(/^\//, "");
+        filename = filename.replace(/\/+/g, "/").replace(/(^|\/)\./g, "$1_.").replace(/^\//, "");
 
         return filename;
     }
@@ -276,18 +352,34 @@ export default class PxContent {
 
                 break;
             }
+
+            case "imageList":
+            case "imageSeries": {
+                await this.downloadImageList(options);
+
+                break;
+            }
+
+            case "novelList":
+            case "novelSeries": {
+                await this.downloadNovelList(options);
+
+                break;
+            }
         }
+
+        this.setDownloaded();
     }
 
     async downloadIllust(options) {
-        this.button.textContent = browser.i18n.getMessage("phFetch");
+        this.emit("message", browser.i18n.getMessage("phFetch"));
 
-        const imageUrl = new URL(document.querySelector("._illust_modal .wrapper .original-image").getAttribute("data-src"), location.href).href;
+        const imageUrl = new URL(this.document.querySelector("._illust_modal .wrapper .original-image").getAttribute("data-src"), this.url.href).href;
 
-        let imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: location.href } });
+        let imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: this.url.href } });
 
         if (options.convertMode !== "none") {
-            this.button.textContent = browser.i18n.getMessage("phConvert");
+            this.emit("message", browser.i18n.getMessage("phConvert"));
 
             imageBlob = await this.convert({
                 blob: imageBlob,
@@ -296,7 +388,7 @@ export default class PxContent {
             });
         }
 
-        this.button.textContent = browser.i18n.getMessage("phDownload");
+        this.emit("message", browser.i18n.getMessage("phDownload"));
 
         await this.download({
             blob: imageBlob,
@@ -306,10 +398,10 @@ export default class PxContent {
     }
 
     async downloadMultiple(options) {
-        this.button.textContent = browser.i18n.getMessage("phFetch");
+        this.emit("message", browser.i18n.getMessage("phFetch"));
 
-        const firstPageUrl = new URL(document.querySelector(".works_display ._work.multiple").getAttribute("href"), location.href);
-        const firstPageText = await this.util.fetch({ url: firstPageUrl, type: "text", init: { credentials: "include", referrer: location.href } });
+        const firstPageUrl = new URL(this.document.querySelector(".works_display ._work.multiple").getAttribute("href"), this.url.href);
+        const firstPageText = await this.util.fetch({ url: firstPageUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
         const firstPageDomParser = new DOMParser();
         const firstPageDocument = firstPageDomParser.parseFromString(firstPageText, "text/html");
         const firstPageFullSizeContainerElements = Array.from(firstPageDocument.querySelectorAll("a.full-size-container"));
@@ -323,7 +415,7 @@ export default class PxContent {
         const imageUrls = [];
 
         for (const secondPageUrl of secondPageUrls) {
-            const secondPageText = await this.util.fetch({ url: secondPageUrl, type: "text", init: { credentials: "include", referrer: location.href } });
+            const secondPageText = await this.util.fetch({ url: secondPageUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
             const secondPageDomParser = new DOMParser();
             const secondPageDocument = secondPageDomParser.parseFromString(secondPageText, "text/html");
 
@@ -336,13 +428,13 @@ export default class PxContent {
             const imageUrl = imageUrls[i];
             const imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: secondPageUrls[i] } });
 
-            this.button.textContent = `${browser.i18n.getMessage("phFetch")}: ${Math.floor(((i + 1) / imageUrls.length) * 100)}%`;
+            this.emit("message", `${browser.i18n.getMessage("phFetch")}: ${Math.floor(((i + 1) / imageUrls.length) * 100)}%`);
 
             imageBlobs.push(imageBlob);
         }
 
         if (options.convertMode !== "none") {
-            this.button.textContent = browser.i18n.getMessage("phConvert");
+            this.emit("message", browser.i18n.getMessage("phConvert"));
 
             const convertedImageBlobs = [];
 
@@ -355,7 +447,7 @@ export default class PxContent {
                     quality: options.convertQuality
                 });
 
-                this.button.textContent = `${browser.i18n.getMessage("phConvert")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`;
+                this.emit("message", `${browser.i18n.getMessage("phConvert")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`);
 
                 convertedImageBlobs.push(convertedImageBlob);
             }
@@ -363,7 +455,7 @@ export default class PxContent {
             imageBlobs = convertedImageBlobs;
         }
 
-        this.button.textContent = browser.i18n.getMessage("phDownload");
+        this.emit("message", browser.i18n.getMessage("phDownload"));
 
         for (let i = 0; i < imageBlobs.length; i++) {
             const imageBlob = imageBlobs[i];
@@ -374,15 +466,15 @@ export default class PxContent {
                 conflictAction: options.conflictAction
             });
 
-            this.button.textContent = `${browser.i18n.getMessage("phDownload")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`;
+            this.emit("message", `${browser.i18n.getMessage("phDownload")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`);
         }
     }
 
     async downloadBook(options) {
-        this.button.textContent = browser.i18n.getMessage("phFetch");
+        this.emit("message", browser.i18n.getMessage("phFetch"));
 
-        const pageUrl = new URL(document.querySelector(".works_display ._work.multiple").getAttribute("href"), location.href);
-        const pageText = await this.util.fetch({ url: pageUrl, type: "text", init: { credentials: "include", referrer: location.href } });
+        const pageUrl = new URL(this.document.querySelector(".works_display ._work.multiple").getAttribute("href"), this.url.href);
+        const pageText = await this.util.fetch({ url: pageUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
         const pageDomParser = new DOMParser();
         const pageDocument = pageDomParser.parseFromString(pageText, "text/html");
         const pageScriptElements = Array.from(pageDocument.querySelectorAll("script"));
@@ -390,7 +482,7 @@ export default class PxContent {
         const imageUrls = [];
 
         for (const pageScriptElement of pageScriptElements) {
-            const match = pageScriptElement.textContent.match(/pixiv\.context\.originalImages\[(\d+)\] = (".+?")/);
+            const match = pageScriptElement.textContent.match(/pixiv\.context\.originalImages\[(\d+)\][ \t]*=[ \t]*(".+?")/);
 
             if (match === null) continue;
 
@@ -403,13 +495,13 @@ export default class PxContent {
             const imageUrl = imageUrls[i];
             const imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: pageUrl } });
 
-            this.button.textContent = `${browser.i18n.getMessage("phFetch")}: ${Math.floor(((i + 1) / imageUrls.length) * 100)}%`;
+            this.emit("message", `${browser.i18n.getMessage("phFetch")}: ${Math.floor(((i + 1) / imageUrls.length) * 100)}%`);
 
             imageBlobs.push(imageBlob);
         }
 
         if (options.convertMode !== "none") {
-            this.button.textContent = browser.i18n.getMessage("phConvert");
+            this.emit("message", browser.i18n.getMessage("phConvert"));
 
             const convertedImageBlobs = [];
 
@@ -422,7 +514,7 @@ export default class PxContent {
                     quality: options.convertQuality
                 });
 
-                this.button.textContent = `${browser.i18n.getMessage("phConvert")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`;
+                this.emit("message", `${browser.i18n.getMessage("phConvert")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`);
 
                 convertedImageBlobs.push(convertedImageBlob);
             }
@@ -430,7 +522,7 @@ export default class PxContent {
             imageBlobs = convertedImageBlobs;
         }
 
-        this.button.textContent = browser.i18n.getMessage("phDownload");
+        this.emit("message", browser.i18n.getMessage("phDownload"));
 
         for (let i = 0; i < imageBlobs.length; i++) {
             const imageBlob = imageBlobs[i];
@@ -441,15 +533,15 @@ export default class PxContent {
                 conflictAction: options.conflictAction
             });
 
-            this.button.textContent = `${browser.i18n.getMessage("phDownload")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`;
+            this.emit("message", `${browser.i18n.getMessage("phDownload")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`);
         }
     }
 
     async downloadManga(options) {
-        this.button.textContent = browser.i18n.getMessage("phFetch");
+        this.emit("message", browser.i18n.getMessage("phFetch"));
 
-        const pageUrl = new URL(document.querySelector(".works_display ._work.manga").getAttribute("href"), location.href);
-        const pageText = await this.util.fetch({ url: pageUrl, type: "text", init: { credentials: "include", referrer: location.href } });
+        const pageUrl = new URL(this.document.querySelector(".works_display ._work.manga").getAttribute("href"), this.url.href);
+        const pageText = await this.util.fetch({ url: pageUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
         const pageDomParser = new DOMParser();
         const pageDocument = pageDomParser.parseFromString(pageText, "text/html");
 
@@ -457,7 +549,7 @@ export default class PxContent {
         let imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: pageUrl } });
 
         if (options.convertMode !== "none") {
-            this.button.textContent = browser.i18n.getMessage("phConvert");
+            this.emit("message", browser.i18n.getMessage("phConvert"));
 
             imageBlob = await this.convert({
                 blob: imageBlob,
@@ -466,7 +558,7 @@ export default class PxContent {
             });
         }
 
-        this.button.textContent = browser.i18n.getMessage("phDownload");
+        this.emit("message", browser.i18n.getMessage("phDownload"));
 
         await this.download({
             blob: imageBlob,
@@ -504,14 +596,14 @@ export default class PxContent {
     }
 
     async downloadUgoiraZip(options) {
-        this.button.textContent = browser.i18n.getMessage("phFetch");
+        this.emit("message", browser.i18n.getMessage("phFetch"));
 
         const ugoiraData = this.pixiv.context.ugokuIllustFullscreenData;
 
-        const zipUrl = new URL(ugoiraData.src, location.href).href;
-        const zipArrayBuffer = await this.util.fetch({ url: zipUrl, type: "arraybuffer", init: { credentials: "include", referrer: location.href } });
+        const zipUrl = new URL(ugoiraData.src, this.url.href).href;
+        const zipArrayBuffer = await this.util.fetch({ url: zipUrl, type: "arraybuffer", init: { credentials: "include", referrer: this.url.href } });
 
-        this.button.textContent = browser.i18n.getMessage("phLoad");
+        this.emit("message", browser.i18n.getMessage("phLoad"));
 
         const zipObject = await JSZip.loadAsync(zipArrayBuffer);
 
@@ -519,7 +611,7 @@ export default class PxContent {
 
         const zipBlob = await zipObject.generateAsync({ type: "blob" });
 
-        this.button.textContent = browser.i18n.getMessage("phDownload");
+        this.emit("message", browser.i18n.getMessage("phDownload"));
 
         await this.download({
             blob: zipBlob,
@@ -529,7 +621,7 @@ export default class PxContent {
     }
 
     async downloadUgoiraGif(options) {
-        this.button.textContent = browser.i18n.getMessage("phFetch");
+        this.emit("message", browser.i18n.getMessage("phFetch"));
 
         const gifWorkerBlob = await this.resource({ path: "lib/gif.worker.js", type: "text/javascript" });
         const gif = new GIF({
@@ -540,10 +632,10 @@ export default class PxContent {
 
         const ugoiraData = this.pixiv.context.ugokuIllustFullscreenData;
 
-        const zipUrl = new URL(ugoiraData.src, location.href).href;
-        const zipArrayBuffer = await this.util.fetch({ url: zipUrl, type: "arraybuffer", init: { credentials: "include", referrer: location.href } });
+        const zipUrl = new URL(ugoiraData.src, this.url.href).href;
+        const zipArrayBuffer = await this.util.fetch({ url: zipUrl, type: "arraybuffer", init: { credentials: "include", referrer: this.url.href } });
 
-        this.button.textContent = browser.i18n.getMessage("phLoad");
+        this.emit("message", browser.i18n.getMessage("phLoad"));
 
         const zipObject = await JSZip.loadAsync(zipArrayBuffer);
 
@@ -560,12 +652,12 @@ export default class PxContent {
 
             URL.revokeObjectURL(sourceImageUrl);
 
-            this.button.textContent = `${browser.i18n.getMessage("phLoad")}: ${Math.floor(((i + 1) / ugoiraData.frames.length) * 100)}%`;
+            this.emit("message", `${browser.i18n.getMessage("phLoad")}: ${Math.floor(((i + 1) / ugoiraData.frames.length) * 100)}%`);
 
             loadedImageElements.push(loadedImageElement);
         }
 
-        this.button.textContent = browser.i18n.getMessage("phProcess");
+        this.emit("message", browser.i18n.getMessage("phProcess"));
 
         for (let i = 0; i < loadedImageElements.length; i++) {
             const loadedImageElement = loadedImageElements[i];
@@ -575,7 +667,7 @@ export default class PxContent {
 
         const imageBlob = await new Promise(resolve => {
             gif.on("progress", ratio => {
-                this.button.textContent = `${browser.i18n.getMessage("phProcess")}: ${Math.floor(ratio * 100)}%`;
+                this.emit("message", `${browser.i18n.getMessage("phProcess")}: ${Math.floor(ratio * 100)}%`);
             });
 
             gif.on("finished", blob => {
@@ -585,7 +677,7 @@ export default class PxContent {
             gif.render();
         });
 
-        this.button.textContent = browser.i18n.getMessage("phDownload");
+        this.emit("message", browser.i18n.getMessage("phDownload"));
 
         await this.download({
             blob: imageBlob,
@@ -595,16 +687,16 @@ export default class PxContent {
     }
 
     async downloadUgoiraApng(options) {
-        this.button.textContent = browser.i18n.getMessage("phFetch");
+        this.emit("message", browser.i18n.getMessage("phFetch"));
 
         const apng = new Apng();
 
         const ugoiraData = this.pixiv.context.ugokuIllustFullscreenData;
 
-        const zipUrl = new URL(ugoiraData.src, location.href).href;
-        const zipArrayBuffer = await this.util.fetch({ url: zipUrl, type: "arraybuffer", init: { credentials: "include", referrer: location.href } });
+        const zipUrl = new URL(ugoiraData.src, this.url.href).href;
+        const zipArrayBuffer = await this.util.fetch({ url: zipUrl, type: "arraybuffer", init: { credentials: "include", referrer: this.url.href } });
 
-        this.button.textContent = browser.i18n.getMessage("phConvert");
+        this.emit("message", browser.i18n.getMessage("phConvert"));
 
         const zipObject = await JSZip.loadAsync(zipArrayBuffer);
 
@@ -622,12 +714,12 @@ export default class PxContent {
                 quality: options.ugoiraQuality
             });
 
-            this.button.textContent = `${browser.i18n.getMessage("phConvert")}: ${Math.floor(((i + 1) / ugoiraData.frames.length) * 100)}%`;
+            this.emit("message", `${browser.i18n.getMessage("phConvert")}: ${Math.floor(((i + 1) / ugoiraData.frames.length) * 100)}%`);
 
             convertedImageBlobs.push(convertedImageBlob);
         }
 
-        this.button.textContent = browser.i18n.getMessage("phProcess");
+        this.emit("message", browser.i18n.getMessage("phProcess"));
 
         for (let i = 0; i < convertedImageBlobs.length; i++) {
             const convertedImageBlob = convertedImageBlobs[i];
@@ -637,7 +729,7 @@ export default class PxContent {
 
         const imageBlob = await apng.render();
 
-        this.button.textContent = browser.i18n.getMessage("phDownload");
+        this.emit("message", browser.i18n.getMessage("phDownload"));
 
         await this.download({
             blob: imageBlob,
@@ -647,16 +739,16 @@ export default class PxContent {
     }
 
     async downloadUgoiraWebp(options) {
-        this.button.textContent = browser.i18n.getMessage("phFetch");
+        this.emit("message", browser.i18n.getMessage("phFetch"));
 
         const webp = new Webp();
 
         const ugoiraData = this.pixiv.context.ugokuIllustFullscreenData;
 
-        const zipUrl = new URL(ugoiraData.src, location.href).href;
-        const zipArrayBuffer = await this.util.fetch({ url: zipUrl, type: "arraybuffer", init: { credentials: "include", referrer: location.href } });
+        const zipUrl = new URL(ugoiraData.src, this.url.href).href;
+        const zipArrayBuffer = await this.util.fetch({ url: zipUrl, type: "arraybuffer", init: { credentials: "include", referrer: this.url.href } });
 
-        this.button.textContent = browser.i18n.getMessage("phConvert");
+        this.emit("message", browser.i18n.getMessage("phConvert"));
 
         const zipObject = await JSZip.loadAsync(zipArrayBuffer);
 
@@ -674,12 +766,12 @@ export default class PxContent {
                 quality: options.ugoiraQuality
             });
 
-            this.button.textContent = `${browser.i18n.getMessage("phConvert")}: ${Math.floor(((i + 1) / ugoiraData.frames.length) * 100)}%`;
+            this.emit("message", `${browser.i18n.getMessage("phConvert")}: ${Math.floor(((i + 1) / ugoiraData.frames.length) * 100)}%`);
 
             convertedImageBlobs.push(convertedImageBlob);
         }
 
-        this.button.textContent = browser.i18n.getMessage("phProcess");
+        this.emit("message", browser.i18n.getMessage("phProcess"));
 
         for (let i = 0; i < convertedImageBlobs.length; i++) {
             const convertedImageBlob = convertedImageBlobs[i];
@@ -689,7 +781,7 @@ export default class PxContent {
 
         const imageBlob = await webp.render();
 
-        this.button.textContent = browser.i18n.getMessage("phDownload");
+        this.emit("message", browser.i18n.getMessage("phDownload"));
 
         await this.download({
             blob: imageBlob,
@@ -699,17 +791,17 @@ export default class PxContent {
     }
 
     async downloadNovel(options) {
-        this.button.textContent = browser.i18n.getMessage("phFetch");
+        this.emit("message", browser.i18n.getMessage("phFetch"));
 
-        const pageUrl = location.href;
+        const pageUrl = this.url.href;
 
-        const pageText = await this.util.fetch({ url: pageUrl, type: "text", init: { credentials: "include", referrer: location.href } });
+        const pageText = await this.util.fetch({ url: pageUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
         const pageDomParser = new DOMParser();
         const pageDocument = pageDomParser.parseFromString(pageText, "text/html");
 
         const textBlob = new Blob([pageDocument.querySelector("#novel_text").textContent.replace(/\r\n|\r|\n/g, "\r\n")], { type: "text/plain" });
 
-        this.button.textContent = browser.i18n.getMessage("phDownload");
+        this.emit("message", browser.i18n.getMessage("phDownload"));
 
         await this.download({
             blob: textBlob,
@@ -718,7 +810,89 @@ export default class PxContent {
         });
     }
 
+    async downloadImageList() {
+        const itemUrls = Array.from(document.querySelectorAll(".image-item a.work")).map(elem => new URL(elem.getAttribute("href"), this.url.href).href);
+
+        for (let i = 0; i < itemUrls.length; i++) {
+            const itemUrl = itemUrls[i];
+
+            const itemText = await this.util.fetch({ url: itemUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
+            const itemDomParser = new DOMParser();
+            const itemDocument = itemDomParser.parseFromString(itemText, "text/html");
+
+            const itemPxContent = new PxContent({
+                url: itemUrl,
+                doc: itemDocument
+            });
+
+            itemPxContent.on("message", message => {
+                this.emit("message", `[${i + 1} / ${itemUrls.length}]: ${message}`);
+            });
+
+            try {
+                await itemPxContent.downloadPixiv();
+            } catch (err) {
+                throw new Error(`[${i + 1} / ${itemUrls.length}]: ${err.message}`);
+            }
+
+            await sleep(250);
+        }
+    }
+
+    async downloadNovelList() {
+        const itemUrls = Array.from(document.querySelectorAll("._novel-item .title a")).map(elem => new URL(elem.getAttribute("href"), this.url.href).href);
+
+        for (let i = 0; i < itemUrls.length; i++) {
+            const itemUrl = itemUrls[i];
+
+            const itemText = await this.util.fetch({ url: itemUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
+            const itemDomParser = new DOMParser();
+            const itemDocument = itemDomParser.parseFromString(itemText, "text/html");
+
+            const itemPxContent = new PxContent({
+                url: itemUrl,
+                doc: itemDocument
+            });
+
+            itemPxContent.on("message", message => {
+                this.emit("message", `[${i + 1} / ${itemUrls.length}]: ${message}`);
+            });
+
+            try {
+                await itemPxContent.downloadPixiv();
+            } catch (err) {
+                throw new Error(`[${i + 1} / ${itemUrls.length}]: ${err.message}`);
+            }
+
+            await sleep(250);
+        }
+    }
+
     addButton() {
+        switch (this.page) {
+            case "ugoira":
+            case "book":
+            case "multiple":
+            case "manga":
+            case "illust":
+            case "novel": {
+                this.addButtonWork();
+
+                break;
+            }
+
+            case "imageList":
+            case "imageSeries":
+            case "novelList":
+            case "novelSeries": {
+                //this.addButtonList();
+
+                break;
+            }
+        }
+    }
+
+    addButtonWork() {
         const parent = document.querySelector(".user-reaction");
 
         const div = document.createElement("div");
@@ -726,35 +900,79 @@ export default class PxContent {
 
         const listener = async () => {
             a.removeEventListener("click", listener);
-            a.style.setProperty("background-image", "none", "important");
+            a.classList.add("off");
 
             try {
                 await this.downloadPixiv();
 
-                this.button.textContent = browser.i18n.getMessage("phDone");
+                a.textContent = browser.i18n.getMessage("phDone");
             } catch (err) {
-                this.button.textContent = browser.i18n.getMessage("phRetry");
+                a.textContent = browser.i18n.getMessage("phRetry");
 
                 alert(err.message);
                 console.error(err);
             }
 
             a.addEventListener("click", listener);
-            a.style.removeProperty("background-image");
+            a.classList.remove("off");
         };
 
-        div.style.margin = "20px 0 0 auto";
+        div.style.margin = "15px 0";
 
-        a.classList.add("_button");
-        a.style.width = "120px";
-        a.textContent = "Px Downloader";
+        a.classList.add("px-button");
+        a.style.width = "150px";
+        a.textContent = this.getDownloaded() ? browser.i18n.getMessage("phDone") : "Px Downloader";
 
         a.addEventListener("click", listener);
 
         div.appendChild(a);
         parent.insertBefore(div, null);
 
-        this.button = a;
+        this.on("message", message => {
+            a.textContent = message;
+        });
+    }
+
+    addButtonList() {
+        const ref = document.querySelector(".column-title") || document.querySelector("._illust-series-detail .header");
+
+        const div = document.createElement("div");
+        const a = document.createElement("a");
+
+        const listener = async () => {
+            a.removeEventListener("click", listener);
+            a.classList.add("off");
+
+            try {
+                await this.downloadPixiv();
+
+                a.textContent = browser.i18n.getMessage("phDone");
+            } catch (err) {
+                a.textContent = browser.i18n.getMessage("phRetry");
+
+                alert(err.message);
+                console.error(err);
+            }
+
+            a.addEventListener("click", listener);
+            a.classList.remove("off");
+        };
+
+        div.style.float = "right";
+        div.style.margin = "10px 20px";
+
+        a.classList.add("px-button");
+        a.style.width = "200px";
+        a.textContent = "Px Downloader";
+
+        a.addEventListener("click", listener);
+
+        div.appendChild(a);
+        ref.parentNode.insertBefore(div, ref);
+
+        this.on("message", message => {
+            a.textContent = message;
+        });
     }
 
     convert(options) {

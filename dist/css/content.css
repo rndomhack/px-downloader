@@ -1,0 +1,50 @@
+.px-button
+{
+    font-weight: bold;
+    line-height: 30px;
+
+    display: inline-block;
+
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+
+    color: #fff;
+    border-radius: 4px;
+    background-color: #009cff;
+}
+
+.px-button:hover
+{
+    text-decoration: none;
+
+    background-color: #008fea;
+}
+
+.px-button.off
+{
+    cursor: default;
+
+    color: #666;
+    background-color: #eee;
+}
+
+.px-button.off:hover
+{
+    text-decoration: none;
+}
+
+.px-downloaded
+{
+    display: flex;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 6px;
+    height: 12px;
+    border-radius: 0 0 0 4px;
+    background-color: rgba(0,0,0,0.4);
+    line-height: 1;
+    font-size: 12px;
+    color: #fff;
+}

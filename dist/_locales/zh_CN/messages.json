@@ -71,6 +71,12 @@
     "optDescriptionMacrosList_userName": {
         "message": "用户名"
     },
+    "optDescriptionMacrosList_seriesId": {
+      "message": "系列ID"
+    },
+    "optDescriptionMacrosList_seriesName": {
+      "message": "系列名"
+    },
     "optDescriptionMacrosList_YYYY": {
         "message": "年"
     },
@@ -136,11 +142,5 @@
     },
     "phRetry": {
         "message": "重试"
-    },
-    "errGetPixiv": {
-        "message": "找不到 \"getPixiv\" 元素"
-    },
-    "errGetPage": {
-        "message": "认识不到该页面"
     }
 }

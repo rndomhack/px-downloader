@@ -74,6 +74,12 @@
     "optDescriptionMacrosList_userName": {
         "message": "ユーザー名"
     },
+    "optDescriptionMacrosList_seriesId": {
+      "message": "シリーズID"
+    },
+    "optDescriptionMacrosList_seriesName": {
+      "message": "シリーズ名"
+    },
     "optDescriptionMacrosList_YYYY": {
         "message": "年"
     },
@@ -139,11 +145,5 @@
     },
     "phRetry": {
         "message": "リトライ"
-    },
-    "errGetPixiv": {
-        "message": "\"getPixiv\" 要素が見つかりません"
-    },
-    "errGetPage": {
-        "message": "ページを識別できません"
     }
 }

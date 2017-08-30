@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (util.browser !== "chrome") {
         document.querySelector("[i18n='settingsForceFilename']").style.display = "none";
+        document.querySelector("#conflictAction option[value='prompt']").style.display = "none";
         document.querySelector("#forceFilename").style.display = "none";
         document.querySelector("#convertMode option[value='webp']").style.display = "none";
         document.querySelector("#ugoiraMode option[value='webp']").style.display = "none";

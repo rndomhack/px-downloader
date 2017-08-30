@@ -74,6 +74,12 @@
     "optDescriptionMacrosList_userName": {
         "message": "User name"
     },
+    "optDescriptionMacrosList_seriesId": {
+        "message": "Series ID"
+    },
+    "optDescriptionMacrosList_seriesName": {
+        "message": "Series name"
+    },
     "optDescriptionMacrosList_YYYY": {
         "message": "Year"
     },
@@ -139,11 +145,5 @@
     },
     "phRetry": {
         "message": "Retry"
-    },
-    "errGetPixiv": {
-        "message": "Can't find \"getPixiv\" element"
-    },
-    "errGetPage": {
-        "message": "Can't identify page"
     }
 }

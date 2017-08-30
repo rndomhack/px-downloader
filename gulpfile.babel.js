@@ -13,6 +13,10 @@ const paths = {
         "./dist/lib/",
         "./dist.zip"
     ],
+    watch: [
+        "./src/js/*.js",
+        "./src/lib/*.js"
+    ],
     scripts: {
         src: "./src/js/*.js",
         dest: "./dist/js/"
@@ -52,4 +56,8 @@ export function build() {
     return gulp.src(paths.zip.src)
         .pipe(zip("dist.zip"))
         .pipe(gulp.dest(paths.zip.dest));
+}
+
+export function watch() {
+    gulp.watch(paths.watch, scripts);
 }
