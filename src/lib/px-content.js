@@ -295,14 +295,14 @@ export default class PxContent extends EventEmitter {
         const macro = {};
 
         macro.index = index.toString();
-        macro.index2 = `0${index}`.slice(-2);
-        macro.index3 = `00${index}`.slice(-3);
-        macro.index4 = `000${index}`.slice(-4);
+        macro.index2 = index.toString().padStart(2, "0");
+        macro.index3 = index.toString().padStart(3, "0");
+        macro.index4 = index.toString().padStart(4, "0");
 
         macro.page = (index + 1).toString();
-        macro.page2 = `0${index + 1}`.slice(-2);
-        macro.page3 = `00${index + 1}`.slice(-3);
-        macro.page4 = `000${index + 1}`.slice(-4);
+        macro.page2 = (index + 1).toString().padStart(2, "0");
+        macro.page3 = (index + 1).toString().padStart(3, "0");
+        macro.page4 = (index + 1).toString().padStart(4, "0");
 
         Object.assign(macro, this.macro);
 
