@@ -114,22 +114,30 @@ export default class PxContent extends EventEmitter {
 
         if (this.pixiv.context.hasOwnProperty("illustId")) {
             macro.id = this.pixiv.context.illustId;
+        } else {
+            macro.id = "";
         }
 
         if (this.pixiv.context.hasOwnProperty("illustTitle")) {
             macro.title = this.pixiv.context.illustTitle;
         } else if (this.document.querySelector(".novel-headinfo .title") !== null) {
             macro.title = this.document.querySelector(".novel-headinfo .title").textContent;
+        } else {
+            macro.title = "";
         }
 
         if (this.pixiv.context.hasOwnProperty("userId")) {
             macro.userId = this.pixiv.context.userId;
+        } else {
+            macro.userId = "";
         }
 
         if (this.pixiv.context.hasOwnProperty("userName")) {
             macro.userName = this.pixiv.context.userName;
         } else if (this.document.querySelector(".novel-headinfo .author a") !== null) {
             macro.userName = this.document.querySelector(".novel-headinfo .author a").textContent;
+        } else {
+            macro.userName = "";
         }
 
         if (this.document.querySelector("._illust-series-title-text") !== null) {
@@ -142,6 +150,9 @@ export default class PxContent extends EventEmitter {
 
             macro.seriesName = elem.textContent;
             macro.seriesId = elem.getAttribute("href").match(/\/series\.php\?id=(\d+)/)[1];
+        } else {
+            macro.seriesName = "";
+            macro.seriesId = "";
         }
 
         if (this.document.querySelector(".languages .current") !== null && this.document.querySelector(".meta") !== null) {
@@ -178,14 +189,26 @@ export default class PxContent extends EventEmitter {
             macro.YYYY = date.getFullYear().toString();
             macro.YY = date.getFullYear().toString().slice(-2);
             macro.M = (date.getMonth() + 1).toString();
-            macro.MM = `0${date.getMonth() + 1}`.slice(-2);
+            macro.MM = (date.getMonth() + 1).toString().padStart(2, "0");
             macro.D = date.getDate().toString();
-            macro.DD = `0${date.getDate()}`.slice(-2);
+            macro.DD = date.getDate().toString().padStart(2, "0");
             macro.weekday = browser.i18n.getMessage("weekdays").split(",")[date.getDay()];
             macro.h = date.getHours().toString();
-            macro.hh = `0${date.getHours()}`.slice(-2);
+            macro.hh = date.getHours().toString().padStart(2, "0");
             macro.m = date.getMinutes().toString();
-            macro.mm = `0${date.getMinutes()}`.slice(-2);
+            macro.mm = date.getMinutes().toString().padStart(2, "0");
+        } else {
+            macro.YYYY = "";
+            macro.YY = "";
+            macro.M = "";
+            macro.MM = "";
+            macro.D = "";
+            macro.DD = "";
+            macro.weekday = "";
+            macro.h = "";
+            macro.hh = "";
+            macro.m = "";
+            macro.mm = "";
         }
 
         return macro;
