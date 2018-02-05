@@ -77,7 +77,8 @@ export default class PxBackground {
             const downloadId = await browserDownload({
                 url: options.blobUrl,
                 filename: options.filename,
-                conflictAction: options.conflictAction
+                conflictAction: options.conflictAction,
+                saveAs: false
             });
 
             // Set filename
@@ -93,7 +94,8 @@ export default class PxBackground {
             const downloadId = await browserDownload({
                 url: URL.createObjectURL(options.blob),
                 filename: options.filename,
-                conflictAction: options.conflictAction
+                conflictAction: options.conflictAction,
+                saveAs: false
             });
 
             return downloadId;
@@ -104,7 +106,8 @@ export default class PxBackground {
             const downloadId = await browserDownload({
                 url: blobUrl,
                 filename: options.filename,
-                conflictAction: options.conflictAction
+                conflictAction: options.conflictAction,
+                saveAs: false
             });
 
             return downloadId;
