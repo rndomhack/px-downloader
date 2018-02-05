@@ -13,15 +13,12 @@ export default {
                 options: {
                     presets: [
                         [
-                            "env",
+                            "@babel/preset-env",
                             {
                                 targets: {
-                                    chrome: 54,
-                                    firefox: 52
-                                },
-                                exclude: [
-                                    "transform-regenerator"
-                                ]
+                                    chrome: 60,
+                                    firefox: 58
+                                }
                             }
                         ]
                     ]
