@@ -1,6 +1,6 @@
 {
   "name": "px-downloader",
-  "version": "3.2.3",
+  "version": "3.3.0",
   "description": "Download illust, manga, ugoira(animation) and novel from Pixiv",
   "main": "index.js",
   "scripts": {
