@@ -48,3 +48,26 @@
     font-size: 12px;
     color: #fff;
 }
+
+.px-button-new
+{
+    background: none;
+    border: none;
+    color: #333;
+    cursor: pointer;
+    display: inline-block;
+    font-weight: 700;
+    height: 32px;
+    line-height: 32px;
+    padding: 0;
+}
+
+.px-button-new.off
+{
+    color: #bbb;
+    cursor: default;
+}
+
+.px-button-new span {
+    vertical-align: middle;
+}
