@@ -1,6 +1,7 @@
 import path from "path";
 
 export default {
+    mode: "production",
     module: {
         rules: [
             {
