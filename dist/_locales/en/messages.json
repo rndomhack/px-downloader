@@ -107,10 +107,10 @@
     "optDescriptionMacrosList_hh": {
         "message": "Hours(2 digits)"
     },
-    "optDescriptionMacrosList_m": {
+    "optDescriptionMacrosList_m_2": {
         "message": "Minutes"
     },
-    "optDescriptionMacrosList_mm": {
+    "optDescriptionMacrosList_mm_2": {
         "message": "Minutes(2 digits)"
     },
     "optDescriptionMacrosList_page": {
