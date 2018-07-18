@@ -166,8 +166,6 @@ export default class PxContentNew extends EventEmitter {
             macro.mm = "";
         }
 
-        console.log(macro);
-
         return macro;
     }
 
@@ -343,8 +341,6 @@ export default class PxContentNew extends EventEmitter {
         this.emit("message", browser.i18n.getMessage("phFetch"));
 
         const imageUrl = this.illustData.urls.original;
-
-        console.log(imageUrl);
 
         let imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: this.url.href } });
 
@@ -849,7 +845,7 @@ export default class PxContentNew extends EventEmitter {
     }
 
     addButtonWork() {
-        const parent = document.querySelector(".sticky section");
+        const parent = document.querySelector("figure section");
 
         const div = document.createElement("div");
         const a = document.createElement("a");
