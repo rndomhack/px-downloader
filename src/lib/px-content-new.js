@@ -379,33 +379,18 @@ export default class PxContentNew extends EventEmitter {
     }
 
     async downloadManga(options) {
-        const firstPageUrl = new URL(`/member_illust.php?mode=manga&illust_id=${this.illustData.illustId}`, this.url.href);
-        const firstPageText = await this.util.fetch({ url: firstPageUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
-        const firstPageDomParser = new DOMParser();
-        const firstPageDocument = firstPageDomParser.parseFromString(firstPageText, "text/html");
-        const firstPageFullSizeContainerElements = Array.from(firstPageDocument.querySelectorAll("a.full-size-container"));
+        const res = await fetch(`https://www.pixiv.net/ajax/illust/${this.illustData.illustId}/pages`, { credentials: "include" });
+        const data = await res.json();
 
-        const secondPageUrls = [];
+        const pages = data.body;
 
-        for (const firstPageFullSizeContainerElement of firstPageFullSizeContainerElements) {
-            secondPageUrls.push(new URL(firstPageFullSizeContainerElement.getAttribute("href"), firstPageUrl).href);
-        }
-
-        const imageUrls = [];
-
-        for (const secondPageUrl of secondPageUrls) {
-            const secondPageText = await this.util.fetch({ url: secondPageUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
-            const secondPageDomParser = new DOMParser();
-            const secondPageDocument = secondPageDomParser.parseFromString(secondPageText, "text/html");
-
-            imageUrls.push(new URL(secondPageDocument.querySelector("img").getAttribute("src"), secondPageUrl).href);
-        }
+        const imageUrls = pages.map(page => page.urls.original);
 
         let imageBlobs = [];
 
         for (let i = 0; i < imageUrls.length; i++) {
             const imageUrl = imageUrls[i];
-            const imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: secondPageUrls[i] } });
+            const imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: this.url.href } });
 
             this.emit("message", `${browser.i18n.getMessage("phFetch")}: ${Math.floor(((i + 1) / imageUrls.length) * 100)}%`);
 
