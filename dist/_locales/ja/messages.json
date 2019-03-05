@@ -77,8 +77,8 @@
     "optDescriptionMacrosList_seriesId": {
       "message": "シリーズID"
     },
-    "optDescriptionMacrosList_seriesName": {
-      "message": "シリーズ名"
+    "optDescriptionMacrosList_seriesTitle": {
+      "message": "シリーズタイトル"
     },
     "optDescriptionMacrosList_YYYY": {
         "message": "年"

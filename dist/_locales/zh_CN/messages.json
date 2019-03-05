@@ -74,8 +74,8 @@
     "optDescriptionMacrosList_seriesId": {
       "message": "系列ID"
     },
-    "optDescriptionMacrosList_seriesName": {
-      "message": "系列名"
+    "optDescriptionMacrosList_seriesTitle": {
+      "message": "系列标题"
     },
     "optDescriptionMacrosList_YYYY": {
         "message": "年"
