@@ -48,37 +48,20 @@ export default class PxContentNew extends EventEmitter {
     }
 
     async init() {
-        this.illustData = await this.getIllustData();
-        this.userData = await this.getUserData();
         this.page = this.getPage();
-        this.macro = this.getMacro();
-    }
 
-    async getIllustData() {
-        const res = await fetch(`https://www.pixiv.net/ajax/illust/${this.url.searchParams.get("illust_id")}`, { credentials: "include" });
-        const data = await res.json();
-
-        return data.body;
-    }
-
-    async getUserData() {
-        const res = await fetch(`https://www.pixiv.net/ajax/user/${this.illustData.userId}`, { credentials: "include" });
-        const data = await res.json();
-
-        return data.body;
+        if (this.page === "illust" || this.page === "novel") {
+            this.data = await this.getData();
+            this.userData = await this.getUserData();
+            this.macro = this.getMacro();
+        }
     }
 
     getPage() {
         let page = "";
 
         if (this.url.pathname === "/member_illust.php" && this.url.searchParams.get("illust_id") !== null) {
-            if (this.illustData.illustType === 2) {
-                page = "ugoira";
-            } else if (this.illustData.pageCount !== 1) {
-                page = "multiple";
-            } else {
-                page = "illust";
-            }
+            page = "illust";
         } else if (this.url.pathname === "/novel/show.php" && this.url.searchParams.get("id") !== null) {
             page = "novel";
         } else if (this.url.pathname === "/member_illust.php") {
@@ -94,52 +77,73 @@ export default class PxContentNew extends EventEmitter {
         return page;
     }
 
+    async getData() {
+        let data = null;
+
+        if (this.page === "illust") {
+            const response = await fetch(`https://www.pixiv.net/ajax/illust/${this.url.searchParams.get("illust_id")}`, { credentials: "include" });
+            const json = await response.json();
+
+            data = json.body;
+        } else if (this.page === "novel") {
+            const response = await fetch(`https://www.pixiv.net/ajax/novel/${this.url.searchParams.get("id")}`, { credentials: "include" });
+            const json = await response.json();
+
+            data = json.body;
+        }
+
+        return data;
+    }
+
+    async getUserData() {
+        const response = await fetch(`https://www.pixiv.net/ajax/user/${this.data.userId}`, { credentials: "include" });
+        const json = await response.json();
+        const data = json.body;
+
+        return data;
+    }
+
     getMacro() {
         const macro = {};
 
-        if (this.illustData.hasOwnProperty("illustId")) {
-            macro.id = this.illustData.illustId;
+        if (this.data.hasOwnProperty("illustId")) {
+            macro.id = this.data.illustId;
+        } else if (this.data.hasOwnProperty("id")) {
+            macro.id = this.data.id;
         } else {
             macro.id = "";
         }
 
-        if (this.illustData.hasOwnProperty("illustTitle")) {
-            macro.title = this.illustData.illustTitle;
-        } else if (this.document.querySelector(".novel-headinfo .title") !== null) {
-            macro.title = this.document.querySelector(".novel-headinfo .title").textContent;
+        if (this.data.hasOwnProperty("illustTitle")) {
+            macro.title = this.data.illustTitle;
+        } else if (this.data.hasOwnProperty("title")) {
+            macro.title = this.data.title;
         } else {
             macro.title = "";
         }
 
-        if (this.illustData.hasOwnProperty("userId")) {
-            macro.userId = this.illustData.userId;
+        if (this.data.hasOwnProperty("userId")) {
+            macro.userId = this.data.userId;
         } else {
             macro.userId = "";
         }
 
         if (this.userData.hasOwnProperty("name")) {
             macro.userName = this.userData.name;
-        } else if (this.document.querySelector(".novel-headinfo .author a") !== null) {
-            macro.userName = this.document.querySelector(".novel-headinfo .author a").textContent;
         } else {
             macro.userName = "";
         }
 
-        if (this.illustData.hasOwnProperty("illustSeries")) {
-            macro.seriesName = this.illustData.illustSeries.title;
-            macro.seriesId = this.illustData.illustSeries.url.match(/\/user\/\d+\/series\/(\d+)/)[1];
-        } else if (document.querySelector(".type-series") !== null && document.querySelector(".type-series").parentNode.parentNode.querySelector(".area_title h3 a") !== null) {
-            const elem = document.querySelector(".type-series").parentNode.parentNode.querySelector(".area_title h3 a");
-
-            macro.seriesName = elem.textContent;
-            macro.seriesId = elem.getAttribute("href").match(/\/series\.php\?id=(\d+)/)[1];
+        if (this.data.hasOwnProperty("seriesNavData") && this.data.seriesNavData !== null) {
+            macro.seriesTitle = this.data.seriesNavData.title;
+            macro.seriesId = this.data.seriesNavData.seriesId;
         } else {
             macro.seriesName = "";
             macro.seriesId = "";
         }
 
-        if (this.illustData.hasOwnProperty("createDate")) {
-            const date = new Date(this.illustData.createDate);
+        if (this.data.hasOwnProperty("createDate")) {
+            const date = new Date(this.data.createDate);
 
             macro.YYYY = date.getFullYear().toString();
             macro.YY = date.getFullYear().toString().slice(-2);
@@ -296,19 +300,18 @@ export default class PxContentNew extends EventEmitter {
 
         switch (this.page) {
             case "illust": {
-                await this.downloadIllust(options);
+                if (this.data.illustType === 2) {
+                    // ugoira
+                    await this.downloadUgoira(options);
 
-                break;
-            }
+                } else if (this.data.pageCount !== 1) {
+                    // multiple
+                    await this.downloadMultiple(options);
 
-            case "multiple": {
-                await this.downloadMultiple(options);
-
-                break;
-            }
-
-            case "ugoira": {
-                await this.downloadUgoira(options);
+                } else {
+                    // illust
+                    await this.downloadIllust(options);
+                }
 
                 break;
             }
@@ -340,9 +343,10 @@ export default class PxContentNew extends EventEmitter {
     async downloadIllust(options) {
         this.emit("message", browser.i18n.getMessage("phFetch"));
 
-        const imageUrl = this.illustData.urls.original;
+        const imageUrl = this.data.urls.original;
 
-        let imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: this.url.href } });
+        const imageRespose = await fetch(imageUrl, { credentials: "include", referrer: this.url.href });
+        let imageBlob = await imageRespose.blob();
 
         if (options.convertMode !== "none") {
             this.emit("message", browser.i18n.getMessage("phConvert"));
@@ -366,23 +370,10 @@ export default class PxContentNew extends EventEmitter {
     async downloadMultiple(options) {
         this.emit("message", browser.i18n.getMessage("phFetch"));
 
-        const pageUrl = new URL(`/member_illust.php?mode=manga&illust_id=${this.illustData.illustId}`, this.url.href);
-        const pageText = await this.util.fetch({ url: pageUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
-        const pageDomParser = new DOMParser();
-        const pageDocument = pageDomParser.parseFromString(pageText, "text/html");
+        const response = await fetch(`https://www.pixiv.net/ajax/illust/${this.data.illustId}/pages`, { credentials: "include" });
+        const json = await response.json();
 
-        if (pageDocument.querySelector("._book-viewer")) {
-            await this.downloadBook(options);
-        } else {
-            await this.downloadManga(options);
-        }
-    }
-
-    async downloadManga(options) {
-        const res = await fetch(`https://www.pixiv.net/ajax/illust/${this.illustData.illustId}/pages`, { credentials: "include" });
-        const data = await res.json();
-
-        const pages = data.body;
+        const pages = json.body;
 
         const imageUrls = pages.map(page => page.urls.original);
 
@@ -390,72 +381,9 @@ export default class PxContentNew extends EventEmitter {
 
         for (let i = 0; i < imageUrls.length; i++) {
             const imageUrl = imageUrls[i];
-            const imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: this.url.href } });
 
-            this.emit("message", `${browser.i18n.getMessage("phFetch")}: ${Math.floor(((i + 1) / imageUrls.length) * 100)}%`);
-
-            imageBlobs.push(imageBlob);
-        }
-
-        if (options.convertMode !== "none") {
-            this.emit("message", browser.i18n.getMessage("phConvert"));
-
-            const convertedImageBlobs = [];
-
-            for (let i = 0; i < imageBlobs.length; i++) {
-                const imageBlob = imageBlobs[i];
-
-                const convertedImageBlob = await this.convert({
-                    blob: imageBlob,
-                    type: `image/${options.convertMode}`,
-                    quality: options.convertQuality
-                });
-
-                this.emit("message", `${browser.i18n.getMessage("phConvert")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`);
-
-                convertedImageBlobs.push(convertedImageBlob);
-            }
-
-            imageBlobs = convertedImageBlobs;
-        }
-
-        this.emit("message", browser.i18n.getMessage("phDownload"));
-
-        for (let i = 0; i < imageBlobs.length; i++) {
-            const imageBlob = imageBlobs[i];
-
-            await this.download({
-                blob: imageBlob,
-                filename: this.getFilename({ multiFilename: options.multiFilename, index: i, ext: this.getExt(imageBlob) }),
-                conflictAction: options.conflictAction
-            });
-
-            this.emit("message", `${browser.i18n.getMessage("phDownload")}: ${Math.floor(((i + 1) / imageBlobs.length) * 100)}%`);
-        }
-    }
-
-    async downloadBook(options) {
-        const pageUrl = new URL(`/member_illust.php?mode=manga&illust_id=${this.illustData.illustId}`, this.url.href);
-        const pageText = await this.util.fetch({ url: pageUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
-        const pageDomParser = new DOMParser();
-        const pageDocument = pageDomParser.parseFromString(pageText, "text/html");
-        const pageScriptElements = Array.from(pageDocument.querySelectorAll("script"));
-
-        const imageUrls = [];
-
-        for (const pageScriptElement of pageScriptElements) {
-            const match = pageScriptElement.textContent.match(/pixiv\.context\.originalImages\[(\d+)\][ \t]*=[ \t]*(".+?")/);
-
-            if (match === null) continue;
-
-            imageUrls[Number.parseInt(match[1], 10)] = JSON.parse(match[2]);
-        }
-
-        let imageBlobs = [];
-
-        for (let i = 0; i < imageUrls.length; i++) {
-            const imageUrl = imageUrls[i];
-            const imageBlob = await this.util.fetch({ url: imageUrl, type: "blob", init: { credentials: "include", referrer: pageUrl } });
+            const imageRespose = await fetch(imageUrl, { credentials: "include", referrer: this.url.href });
+            const imageBlob = await imageRespose.blob();
 
             this.emit("message", `${browser.i18n.getMessage("phFetch")}: ${Math.floor(((i + 1) / imageUrls.length) * 100)}%`);
 
@@ -500,46 +428,55 @@ export default class PxContentNew extends EventEmitter {
     }
 
     async downloadUgoira(options) {
-        const res = await fetch(`https://www.pixiv.net/ajax/illust/${this.illustData.illustId}/ugoira_meta`, { credentials: "include" });
-        const data = await res.json();
+        this.emit("message", browser.i18n.getMessage("phFetch"));
 
-        this.ugoiraData = data.body;
+        const ugoiraResponse = await fetch(`https://www.pixiv.net/ajax/illust/${this.data.illustId}/ugoira_meta`, { credentials: "include" });
+        const ugoiraJson = await ugoiraResponse.json();
+        const ugoiraData = ugoiraJson.body;
+
+        const zipUrl = ugoiraData.originalSrc;
+
+        const zipResponse = await fetch(zipUrl, { credentials: "include", referrer: this.url.href });
+        const zipArrayBuffer = await zipResponse.arrayBuffer();
+
+        let blob;
 
         switch (options.ugoiraMode) {
             case "zip": {
-                await this.downloadUgoiraZip(options);
+                blob = await this.convertUgoiraToZip(options, ugoiraData, zipArrayBuffer);
 
                 break;
             }
 
             case "gif": {
-                await this.downloadUgoiraGif(options);
+                blob = await this.convertUgoiraToGif(options, ugoiraData, zipArrayBuffer);
 
                 break;
             }
 
             case "apng": {
-                await this.downloadUgoiraApng(options);
+                blob = await this.convertUgoiraToApng(options, ugoiraData, zipArrayBuffer);
 
                 break;
             }
 
             case "webp": {
-                await this.downloadUgoiraWebp(options);
+                blob = await this.convertUgoiraToWebp(options, ugoiraData, zipArrayBuffer);
 
                 break;
             }
         }
+
+        this.emit("message", browser.i18n.getMessage("phDownload"));
+
+        await this.download({
+            blob: blob,
+            filename: this.getFilename({ singleFilename: options.singleFilename, ext: this.getExt(blob) }),
+            conflictAction: options.conflictAction
+        });
     }
 
-    async downloadUgoiraZip(options) {
-        this.emit("message", browser.i18n.getMessage("phFetch"));
-
-        const ugoiraData = this.ugoiraData;
-
-        const zipUrl = ugoiraData.originalSrc;
-        const zipArrayBuffer = await this.util.fetch({ url: zipUrl, type: "arraybuffer", init: { credentials: "include", referrer: this.url.href } });
-
+    async convertUgoiraToZip(options, ugoiraData, zipArrayBuffer) {
         this.emit("message", browser.i18n.getMessage("phLoad"));
 
         const zipObject = await JSZip.loadAsync(zipArrayBuffer);
@@ -548,30 +485,10 @@ export default class PxContentNew extends EventEmitter {
 
         const zipBlob = await zipObject.generateAsync({ type: "blob" });
 
-        this.emit("message", browser.i18n.getMessage("phDownload"));
-
-        await this.download({
-            blob: zipBlob,
-            filename: this.getFilename({ singleFilename: options.singleFilename, ext: this.getExt(zipBlob) }),
-            conflictAction: options.conflictAction
-        });
+        return zipBlob;
     }
 
-    async downloadUgoiraGif(options) {
-        this.emit("message", browser.i18n.getMessage("phFetch"));
-
-        const gifWorkerBlob = await this.resource({ path: "lib/gif.worker.js", type: "text/javascript" });
-        const gif = new GIF({
-            quality: 1,
-            workers: 4,
-            workerScript: URL.createObjectURL(gifWorkerBlob)
-        });
-
-        const ugoiraData = this.ugoiraData;
-
-        const zipUrl = ugoiraData.originalSrc;
-        const zipArrayBuffer = await this.util.fetch({ url: zipUrl, type: "arraybuffer", init: { credentials: "include", referrer: this.url.href } });
-
+    async convertUgoiraToGif(options, ugoiraData, zipArrayBuffer) {
         this.emit("message", browser.i18n.getMessage("phLoad"));
 
         const zipObject = await JSZip.loadAsync(zipArrayBuffer);
@@ -596,6 +513,13 @@ export default class PxContentNew extends EventEmitter {
 
         this.emit("message", browser.i18n.getMessage("phProcess"));
 
+        const gifWorkerBlob = await this.resource({ path: "lib/gif.worker.js", type: "text/javascript" });
+        const gif = new GIF({
+            quality: 1,
+            workers: 4,
+            workerScript: URL.createObjectURL(gifWorkerBlob)
+        });
+
         for (let i = 0; i < loadedImageElements.length; i++) {
             const loadedImageElement = loadedImageElements[i];
 
@@ -614,25 +538,10 @@ export default class PxContentNew extends EventEmitter {
             gif.render();
         });
 
-        this.emit("message", browser.i18n.getMessage("phDownload"));
-
-        await this.download({
-            blob: imageBlob,
-            filename: this.getFilename({ singleFilename: options.singleFilename, ext: this.getExt(imageBlob) }),
-            conflictAction: options.conflictAction
-        });
+        return imageBlob;
     }
 
-    async downloadUgoiraApng(options) {
-        this.emit("message", browser.i18n.getMessage("phFetch"));
-
-        const apng = new Apng();
-
-        const ugoiraData = this.ugoiraData;
-
-        const zipUrl = ugoiraData.originalSrc;
-        const zipArrayBuffer = await this.util.fetch({ url: zipUrl, type: "arraybuffer", init: { credentials: "include", referrer: this.url.href } });
-
+    async convertUgoiraToApng(options, ugoiraData, zipArrayBuffer) {
         this.emit("message", browser.i18n.getMessage("phConvert"));
 
         const zipObject = await JSZip.loadAsync(zipArrayBuffer);
@@ -658,6 +567,8 @@ export default class PxContentNew extends EventEmitter {
 
         this.emit("message", browser.i18n.getMessage("phProcess"));
 
+        const apng = new Apng();
+
         for (let i = 0; i < convertedImageBlobs.length; i++) {
             const convertedImageBlob = convertedImageBlobs[i];
 
@@ -666,25 +577,10 @@ export default class PxContentNew extends EventEmitter {
 
         const imageBlob = await apng.render();
 
-        this.emit("message", browser.i18n.getMessage("phDownload"));
-
-        await this.download({
-            blob: imageBlob,
-            filename: this.getFilename({ singleFilename: options.singleFilename, ext: this.getExt(imageBlob) }),
-            conflictAction: options.conflictAction
-        });
+        return imageBlob;
     }
 
-    async downloadUgoiraWebp(options) {
-        this.emit("message", browser.i18n.getMessage("phFetch"));
-
-        const webp = new Webp();
-
-        const ugoiraData = this.ugoiraData;
-
-        const zipUrl = ugoiraData.originalSrc;
-        const zipArrayBuffer = await this.util.fetch({ url: zipUrl, type: "arraybuffer", init: { credentials: "include", referrer: this.url.href } });
-
+    async convertUgoiraToWebp(options, ugoiraData, zipArrayBuffer) {
         this.emit("message", browser.i18n.getMessage("phConvert"));
 
         const zipObject = await JSZip.loadAsync(zipArrayBuffer);
@@ -710,6 +606,8 @@ export default class PxContentNew extends EventEmitter {
 
         this.emit("message", browser.i18n.getMessage("phProcess"));
 
+        const webp = new Webp();
+
         for (let i = 0; i < convertedImageBlobs.length; i++) {
             const convertedImageBlob = convertedImageBlobs[i];
 
@@ -718,25 +616,13 @@ export default class PxContentNew extends EventEmitter {
 
         const imageBlob = await webp.render();
 
-        this.emit("message", browser.i18n.getMessage("phDownload"));
-
-        await this.download({
-            blob: imageBlob,
-            filename: this.getFilename({ singleFilename: options.singleFilename, ext: this.getExt(imageBlob) }),
-            conflictAction: options.conflictAction
-        });
+        return imageBlob;
     }
 
     async downloadNovel(options) {
         this.emit("message", browser.i18n.getMessage("phFetch"));
 
-        const pageUrl = this.url.href;
-
-        const pageText = await this.util.fetch({ url: pageUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
-        const pageDomParser = new DOMParser();
-        const pageDocument = pageDomParser.parseFromString(pageText, "text/html");
-
-        const textBlob = new Blob([pageDocument.querySelector("#novel_text").textContent.replace(/\r\n|\r|\n/g, "\r\n")], { type: "text/plain" });
+        const textBlob = new Blob([this.data.content.replace(/\r\n|\r|\n/g, "\r\n")], { type: "text/plain" });
 
         this.emit("message", browser.i18n.getMessage("phDownload"));
 
@@ -807,10 +693,6 @@ export default class PxContentNew extends EventEmitter {
 
     addButton() {
         switch (this.page) {
-            case "ugoira":
-            case "book":
-            case "multiple":
-            case "manga":
             case "illust":
             case "novel": {
                 this.addButtonWork();
@@ -830,7 +712,7 @@ export default class PxContentNew extends EventEmitter {
     }
 
     addButtonWork() {
-        const parent = document.querySelector("figure section");
+        const parent = document.querySelector("main section section");
 
         const div = document.createElement("div");
         const a = document.createElement("a");
@@ -1016,7 +898,7 @@ export default class PxContentNew extends EventEmitter {
     }
 
     static escape(str, flag) {
-        return str.replace(flag ? /([/\?\*:\|"<>~\\])/g : /([/\?\*:\|"<>~])/g, PxContentNew.toFull);
+        return str.replace(flag ? /([/?*:|"<>~\\])/g : /([/?*:|"<>~])/g, PxContentNew.toFull);
     }
 
     static toHalf(str) {
@@ -1026,7 +908,7 @@ export default class PxContentNew extends EventEmitter {
     }
 
     static toFull(str) {
-        return str.replace(/[\!-\~]/g, function(s) {
+        return str.replace(/[!-~]/g, function(s) {
             return String.fromCharCode(s.charCodeAt(0) + 0xFEE0);
         }).split(" ").join("\u3000");
     }

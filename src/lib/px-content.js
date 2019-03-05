@@ -1096,7 +1096,7 @@ export default class PxContent extends EventEmitter {
     }
 
     static escape(str, flag) {
-        return str.replace(flag ? /([/\?\*:\|"<>~\\])/g : /([/\?\*:\|"<>~])/g, PxContent.toFull);
+        return str.replace(flag ? /([/?*:|"<>~\\])/g : /([/?*:|"<>~])/g, PxContent.toFull);
     }
 
     static toHalf(str) {
@@ -1106,7 +1106,7 @@ export default class PxContent extends EventEmitter {
     }
 
     static toFull(str) {
-        return str.replace(/[\!-\~]/g, function(s) {
+        return str.replace(/[!-~]/g, function(s) {
             return String.fromCharCode(s.charCodeAt(0) + 0xFEE0);
         }).split(" ").join("\u3000");
     }
