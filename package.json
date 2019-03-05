@@ -26,15 +26,15 @@
   },
   "homepage": "https://github.com/rndomhack/px-downloader#readme",
   "devDependencies": {
-    "@babel/core": "^7.0.0-beta.49",
-    "@babel/preset-env": "^7.0.0-beta.49",
-    "@babel/register": "^7.0.0-beta.49",
-    "babel-loader": "^8.0.0-beta.0",
-    "del": "^3.0.0",
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "@babel/register": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "del": "^4.0.0",
     "gulp": "github:gulpjs/gulp#4.0",
-    "gulp-zip": "^4.1.0",
+    "gulp-zip": "^4.2.0",
     "vinyl-named": "^1.1.0",
-    "webpack": "^4.10.2",
-    "webpack-stream": "^4.0.3"
+    "webpack": "^4.29.6",
+    "webpack-stream": "^5.2.1"
   }
 }
