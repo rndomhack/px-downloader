@@ -41,6 +41,8 @@ export default class PxContentNew extends EventEmitter {
         this.util = new ExtensionUtil();
         this.url = new URL(url || location.href);
         this.document = doc || document;
+
+        this.button = null;
     }
 
     check() {
@@ -753,51 +755,64 @@ export default class PxContentNew extends EventEmitter {
         div.appendChild(a);
         parent.appendChild(div);
 
-        this.on("message", message => {
+        const buttonListener = message => {
             span.textContent = message;
-        });
-    }
-
-    addButtonList() {
-        const ref = document.querySelector(".column-title") || document.querySelector("._illust-series-detail .header");
-
-        const div = document.createElement("div");
-        const a = document.createElement("a");
-
-        const listener = async () => {
-            a.removeEventListener("click", listener);
-            a.classList.add("off");
-
-            try {
-                await this.downloadPixiv();
-
-                a.textContent = browser.i18n.getMessage("phDone");
-            } catch (err) {
-                a.textContent = browser.i18n.getMessage("phRetry");
-
-                alert(err.message);
-                console.error(err);
-            }
-
-            a.addEventListener("click", listener);
-            a.classList.remove("off");
         };
 
-        div.style.float = "right";
-        div.style.margin = "10px 20px";
+        this.on("message", buttonListener);
 
-        a.classList.add("px-button");
-        a.style.width = "200px";
-        a.textContent = "Px Downloader";
+        const buttonObserver = new MutationObserver(mutations => {
+            const target = Array.from(document.querySelectorAll("main section section")).find(elem => elem.children.length > 2);
 
-        a.addEventListener("click", listener);
+            if (target === void 0) return;
+            if (!mutations.some(mutation => Array.from(mutation.addedNodes).some(addedNode => addedNode.contains(target)))) return;
 
-        div.appendChild(a);
-        ref.parentNode.insertBefore(div, ref);
-
-        this.on("message", message => {
-            a.textContent = message;
+            this.button.element.parentElement.removeChild(this.button.element);
+            target.appendChild(this.button.element);
         });
+
+        buttonObserver.observe(document, {
+            childList: true,
+            subtree: true
+        });
+
+        this.button = {
+            element: div,
+            listener: buttonListener,
+            observer: buttonObserver
+        };
+    }
+
+    removeButton() {
+        switch (this.page) {
+            case "illust":
+            case "novel": {
+                this.removeButtonWork();
+
+                break;
+            }
+
+            case "imageList":
+            case "imageSeries":
+            case "novelList":
+            case "novelSeries": {
+                //this.removeButtonList();
+
+                break;
+            }
+        }
+    }
+
+    removeButtonWork() {
+        if (this.button === null) return;
+
+        this.button.element.parentElement.removeChild(this.button.element);
+
+        this.off("message", this.button.listener);
+
+        this.button.observer.disconnect();
+
+        this.button = null;
     }
 
     convert(options) {

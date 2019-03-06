@@ -9,10 +9,16 @@ document.addEventListener("DOMContentLoaded", () => {
             pxContent.addButton();
         }
     } else {
-        let pxContentNew;
+        let promise = Promise.resolve();
+
+        let pxContentNew = null;
 
         const init = function () {
-            (async () => {
+            promise = promise.then(async () => {
+                if (pxContentNew !== null) {
+                    pxContentNew.removeButton();
+                }
+
                 pxContentNew = new PxContentNew();
 
                 await pxContentNew.init();
@@ -20,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (pxContentNew.check()) {
                     pxContentNew.addButton();
                 }
-            })().catch(err => {
+            }).catch(err => {
                 console.error(err);
             });
         };
