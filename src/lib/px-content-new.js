@@ -753,7 +753,10 @@ export default class PxContentNew extends EventEmitter {
         a.appendChild(icon);
         a.appendChild(span);
         div.appendChild(a);
-        parent.appendChild(div);
+
+        if (parent !== null) {
+            parent.appendChild(div);
+        }
 
         const buttonListener = message => {
             span.textContent = message;
@@ -767,7 +770,10 @@ export default class PxContentNew extends EventEmitter {
             if (target === void 0) return;
             if (!mutations.some(mutation => Array.from(mutation.addedNodes).some(addedNode => addedNode.contains(target)))) return;
 
-            this.button.element.parentElement.removeChild(this.button.element);
+            if (this.button.element.parentElement !== null) {
+                this.button.element.parentElement.removeChild(this.button.element);
+            }
+
             target.appendChild(this.button.element);
         });
 
@@ -806,7 +812,9 @@ export default class PxContentNew extends EventEmitter {
     removeButtonWork() {
         if (this.button === null) return;
 
-        this.button.element.parentElement.removeChild(this.button.element);
+        if (this.button.element.parentElement !== null) {
+            this.button.element.parentElement.removeChild(this.button.element);
+        }
 
         this.off("message", this.button.listener);
 
