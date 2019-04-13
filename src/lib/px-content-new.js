@@ -714,7 +714,17 @@ export default class PxContentNew extends EventEmitter {
     }
 
     addButtonWork() {
-        const parent = document.querySelector("main section section");
+        const isMobile = document.querySelector("div#root") === null;
+
+        let parent;
+
+        if (isMobile) {
+            parent = document.querySelector(".work-interactions");
+        } else {
+            parent = document.querySelector("main section section");
+        }
+
+        if (parent === null) return;
 
         const div = document.createElement("div");
         const a = document.createElement("a");
@@ -754,7 +764,10 @@ export default class PxContentNew extends EventEmitter {
         a.appendChild(span);
         div.appendChild(a);
 
-        if (parent !== null) {
+        if (isMobile) {
+            div.classList.add("f-title-xs");
+            parent.insertBefore(div, parent.childNodes[1]);
+        } else {
             parent.appendChild(div);
         }
 

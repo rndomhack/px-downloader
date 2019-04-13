@@ -2,7 +2,7 @@ import PxContent from "../lib/px-content";
 import PxContentNew from "../lib/px-content-new";
 
 document.addEventListener("DOMContentLoaded", () => {
-    if (document.querySelector("div#root") === null) {
+    if (document.querySelector("div#root") === null && document.querySelector("div#wrapper") === null) {
         const pxContent = new PxContent();
 
         if (pxContent.check()) {
