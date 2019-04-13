@@ -345,7 +345,7 @@ export default class PxContentNew extends EventEmitter {
     async downloadIllust(options) {
         this.emit("message", browser.i18n.getMessage("phFetch"));
 
-        const imageUrl = this.data.urls.original;
+        const imageUrl = this.data.urls[options.singleSize];
 
         const imageRespose = await fetch(imageUrl, { credentials: "include", referrer: this.url.href });
         let imageBlob = await imageRespose.blob();
@@ -377,7 +377,7 @@ export default class PxContentNew extends EventEmitter {
 
         const pages = json.body;
 
-        const imageUrls = pages.map(page => page.urls.original);
+        const imageUrls = pages.map(page => page.urls[options.multiSize]);
 
         let imageBlobs = [];
 
@@ -436,7 +436,7 @@ export default class PxContentNew extends EventEmitter {
         const ugoiraJson = await ugoiraResponse.json();
         const ugoiraData = ugoiraJson.body;
 
-        const zipUrl = ugoiraData.originalSrc;
+        const zipUrl = ugoiraData[{regular: "src", original: "originalSrc"}[options.ugoiraSize]];
 
         const zipResponse = await fetch(zipUrl, { credentials: "include", referrer: this.url.href });
         const zipArrayBuffer = await zipResponse.arrayBuffer();

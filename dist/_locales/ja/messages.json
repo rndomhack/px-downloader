@@ -35,6 +35,24 @@
     "optSettingsConflictActionPrompt": {
         "message": "プロンプトを出す"
     },
+    "optSettingsSingleSize": {
+        "message": "画像サイズ(単一イラスト)"
+    },
+    "optSettingsMultiSize": {
+        "message": "画像サイズ(複数イラスト)"
+    },
+    "optSettingsUgoiraSize": {
+        "message": "画像サイズ(うごイラ)"
+    },
+    "optSettingsSizeSmall": {
+        "message": "スモール"
+    },
+    "optSettingsSizeRegular": {
+        "message": "レギュラー"
+    },
+    "optSettingsSizeOriginal": {
+        "message": "オリジナル"
+    },
     "optSettingsConvertMode": {
         "message": "イラストの変換形式"
     },

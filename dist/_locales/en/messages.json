@@ -35,6 +35,24 @@
     "optSettingsConflictActionPrompt": {
         "message": "Prompt"
     },
+    "optSettingsSingleSize": {
+        "message": "Image size (single illust)"
+    },
+    "optSettingsMultiSize": {
+        "message": "Image size (multiple illust)"
+    },
+    "optSettingsUgoiraSize": {
+        "message": "Image size (ugoira)"
+    },
+    "optSettingsSizeSmall": {
+        "message": "Small"
+    },
+    "optSettingsSizeRegular": {
+        "message": "Regular"
+    },
+    "optSettingsSizeOriginal": {
+        "message": "Original"
+    },
     "optSettingsConvertMode": {
         "message": "Convert mode for illust"
     },

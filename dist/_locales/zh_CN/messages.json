@@ -32,6 +32,24 @@
     "optSettingsConflictActionPrompt": {
         "message": "询问"
     },
+    "optSettingsSingleSize": {
+        "message": "Image size (single illust)"
+    },
+    "optSettingsMultiSize": {
+        "message": "Image size (multiple illust)"
+    },
+    "optSettingsUgoiraSize": {
+        "message": "Image size (ugoira)"
+    },
+    "optSettingsSizeSmall": {
+        "message": "Small"
+    },
+    "optSettingsSizeRegular": {
+        "message": "Regular"
+    },
+    "optSettingsSizeOriginal": {
+        "message": "Original"
+    },
     "optSettingsConvertMode": {
         "message": "插画转换模式"
     },
