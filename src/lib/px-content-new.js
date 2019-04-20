@@ -724,7 +724,10 @@ export default class PxContentNew extends EventEmitter {
             parent = document.querySelector("main section section");
         }
 
-        if (parent === null) return;
+        if (parent === null) {
+            setTimeout(this.addButtonWork.bind(this), 100);
+            return;
+        }
 
         const div = document.createElement("div");
         const a = document.createElement("a");
