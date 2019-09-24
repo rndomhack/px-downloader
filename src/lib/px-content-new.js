@@ -62,7 +62,7 @@ export default class PxContentNew extends EventEmitter {
     getPage() {
         let page = "";
 
-        if (this.url.pathname === "/member_illust.php" && this.url.searchParams.get("illust_id") !== null) {
+        if (/\/artworks\/\d+/.test(this.url.pathname)) {
             page = "illust";
         } else if (this.url.pathname === "/novel/show.php" && this.url.searchParams.get("id") !== null) {
             page = "novel";
@@ -83,7 +83,8 @@ export default class PxContentNew extends EventEmitter {
         let data = null;
 
         if (this.page === "illust") {
-            const response = await fetch(`https://www.pixiv.net/ajax/illust/${this.url.searchParams.get("illust_id")}`, { credentials: "include" });
+            const id = location.pathname.match(/\/artworks\/(\d+)/)[1];
+            const response = await fetch(`https://www.pixiv.net/ajax/illust/${id}`, { credentials: "include" });
             const json = await response.json();
 
             data = json.body;
