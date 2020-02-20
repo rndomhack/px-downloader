@@ -3,20 +3,20 @@ import PxContent from "../lib/px-content";
 document.addEventListener("DOMContentLoaded", () => {
     let promise = Promise.resolve();
 
-    let pxContentNew = null;
+    let pxContent = null;
 
     const init = function () {
         promise = promise.then(async () => {
-            if (pxContentNew !== null) {
-                pxContentNew.removeButton();
+            if (pxContent !== null) {
+                pxContent.removeButton();
             }
 
-            pxContentNew = new PxContent();
+            pxContent = new PxContent();
 
-            await pxContentNew.init();
+            await pxContent.init();
 
-            if (pxContentNew.check()) {
-                pxContentNew.addButton();
+            if (pxContent.check()) {
+                pxContent.addButton();
             }
         }).catch(err => {
             console.error(err);
