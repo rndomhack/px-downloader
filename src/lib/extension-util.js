@@ -2,8 +2,7 @@ import browser from "browser";
 
 export default class ExtensionUtil {
     constructor() {
-        //if (browser.storage.hasOwnProperty("sync")) {
-        if (navigator.userAgent.includes("Chrome")) {
+        if (browser.storage.hasOwnProperty("sync")) {
             this.storage = browser.storage.sync;
         } else {
             this.storage = browser.storage.local;
