@@ -1,4 +1,4 @@
-import PxContent from "../lib/px-content-new";
+import PxContent from "../lib/px-content";
 
 document.addEventListener("DOMContentLoaded", () => {
     let promise = Promise.resolve();
