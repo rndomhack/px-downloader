@@ -219,7 +219,7 @@ export default class PxContent extends EventEmitter {
             filename = `${this.replaceMacro(options.singleFilename)}.${options.ext}`;
         }
 
-        filename = filename.replace(/\/+/g, "/").replace(/(^|\/)\./g, "$1_.").replace(/^\//, "");
+        filename = filename.replace(/\/+/g, "/").replace(/(^|\/)\./g, "$1\uFF0E").replace(/\.($|\/)/g, "\uFF0E$1").replace(/^\//, "");
 
         return filename;
     }
@@ -1024,13 +1024,13 @@ export default class PxContent extends EventEmitter {
             });
 
             downloadId = await this.util.message({
-                    type: "download",
-                    data: {
-                        dataUrl: dataUrl,
-                        filename: options.filename,
-                        conflictAction: options.conflictAction
-                    }
-                });
+                type: "download",
+                data: {
+                    dataUrl: dataUrl,
+                    filename: options.filename,
+                    conflictAction: options.conflictAction
+                }
+            });
         }
 
         return downloadId;
