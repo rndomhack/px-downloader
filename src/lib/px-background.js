@@ -21,6 +21,7 @@ export default class PxBackground {
         this.util = new ExtensionUtil();
 
         // Init message listeners
+        this.util.addListener("fetch", this.fetch.bind(this));
         this.util.addListener("resource", this.resource.bind(this));
         this.util.addListener("download", this.download.bind(this));
 
@@ -54,6 +55,38 @@ export default class PxBackground {
         }
     }
 
+    async fetch({url, init}) {
+        if (this.util.browser === "chrome") {
+            const response = await fetch(url, init);
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+
+            return blobUrl;
+        } else if (this.util.browser === "firefox") {
+            const response = await fetch(url, init);
+            const blob = await response.blob();
+
+            return blob;
+        } else {
+            const response = await fetch(url, init);
+            const blob = await response.blob();
+            const dataUrl = await new Promise((resolve, reject) => {
+                const fileReader = new FileReader();
+
+                fileReader.addEventListener("load", () => {
+                    resolve(fileReader.result);
+                });
+
+                fileReader.addEventListener("error", err => {
+                    reject(err);
+                });
+
+                fileReader.readAsDataURL(blob);
+            });
+
+            return dataUrl;
+        }
+    }
 
     async resource({ path }) {
         if (this.util.browser === "chrome") {
