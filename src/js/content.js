@@ -1,75 +1,66 @@
-import PxContent from "../lib/px-content";
-import PxContentNew from "../lib/px-content-new";
+import PxContent from "../lib/px-content-new";
 
 document.addEventListener("DOMContentLoaded", () => {
-    if (document.querySelector("div#root") === null && document.querySelector("div#wrapper") === null) {
-        const pxContent = new PxContent();
+    let promise = Promise.resolve();
 
-        if (pxContent.check()) {
-            pxContent.addButton();
-        }
-    } else {
-        let promise = Promise.resolve();
+    let pxContentNew = null;
 
-        let pxContentNew = null;
+    const init = function () {
+        promise = promise.then(async () => {
+            if (pxContentNew !== null) {
+                pxContentNew.removeButton();
+            }
 
-        const init = function () {
-            promise = promise.then(async () => {
-                if (pxContentNew !== null) {
-                    pxContentNew.removeButton();
-                }
+            pxContentNew = new PxContent();
 
-                pxContentNew = new PxContentNew();
+            await pxContentNew.init();
 
-                await pxContentNew.init();
+            if (pxContentNew.check()) {
+                pxContentNew.addButton();
+            }
+        }).catch(err => {
+            console.error(err);
+        });
+    };
 
-                if (pxContentNew.check()) {
-                    pxContentNew.addButton();
-                }
-            }).catch(err => {
-                console.error(err);
+    const script = document.createElement("script");
+
+    script.textContent = `
+        (() => {
+            "use strict";
+
+            const nativePushState = window.history.pushState;
+
+            window.history.pushState = (...args) => {
+                nativePushState.apply(window.history, args);
+
+                window.postMessage({
+                    type: "pxPushState",
+                    data: null
+                }, "*");
+            };
+
+            window.addEventListener("popstate", () => {
+                window.postMessage({
+                    type: "pxPopState",
+                    data: null
+                }, "*");
             });
-        };
+        })();
+    `;
 
-        const script = document.createElement("script");
+    document.body.appendChild(script);
 
-        script.textContent = `
-            (() => {
-                "use strict";
+    window.addEventListener("message", async event => {
+        const message = event.data;
 
-                const nativePushState = window.history.pushState;
+        if (typeof message !== "object") return;
+        if (message.type !== "pxPushState" && message.type !== "pxPopState") return;
 
-                window.history.pushState = (...args) => {
-                    nativePushState.apply(window.history, args);
+        init();
+    });
 
-                    window.postMessage({
-                        type: "pxPushState",
-                        data: null
-                    }, "*");
-                };
-
-                window.addEventListener("popstate", () => {
-                    window.postMessage({
-                        type: "pxPopState",
-                        data: null
-                    }, "*");
-                });
-            })();
-        `;
-
-        document.body.appendChild(script);
-
-        window.addEventListener("message", async event => {
-            const message = event.data;
-
-            if (typeof message !== "object") return;
-            if (message.type !== "pxPushState" && message.type !== "pxPopState") return;
-
-            init();
-        });
-
-        window.addEventListener("load", () => {
-            init();
-        });
-    }
+    window.addEventListener("load", () => {
+        init();
+    });
 });

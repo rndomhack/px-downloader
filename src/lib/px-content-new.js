@@ -34,7 +34,7 @@ function getImageElement(url) {
     });
 }
 
-export default class PxContentNew extends EventEmitter {
+export default class PxContent extends EventEmitter {
     constructor({url, doc} = {}) {
         super();
 
@@ -270,7 +270,7 @@ export default class PxContentNew extends EventEmitter {
 
     replaceMacro(str) {
         for (const key of Object.keys(this.macro)) {
-            str = str.split("${" + key + "}").join(PxContentNew.escape(this.macro[key], true));
+            str = str.split("${" + key + "}").join(PxContent.escape(this.macro[key], true));
         }
 
         return str;
@@ -292,7 +292,7 @@ export default class PxContentNew extends EventEmitter {
         Object.assign(macro, this.macro);
 
         for (const key of Object.keys(macro)) {
-            str = str.split("${" + key + "}").join(PxContentNew.escape(macro[key], true));
+            str = str.split("${" + key + "}").join(PxContent.escape(macro[key], true));
         }
 
         return str;
@@ -646,7 +646,7 @@ export default class PxContentNew extends EventEmitter {
             const itemDomParser = new DOMParser();
             const itemDocument = itemDomParser.parseFromString(itemText, "text/html");
 
-            const itemPxContent = new PxContentNew({
+            const itemPxContent = new PxContent({
                 url: itemUrl,
                 doc: itemDocument
             });
@@ -675,7 +675,7 @@ export default class PxContentNew extends EventEmitter {
             const itemDomParser = new DOMParser();
             const itemDocument = itemDomParser.parseFromString(itemText, "text/html");
 
-            const itemPxContent = new PxContentNew({
+            const itemPxContent = new PxContent({
                 url: itemUrl,
                 doc: itemDocument
             });
@@ -938,7 +938,7 @@ export default class PxContentNew extends EventEmitter {
     }
 
     static escape(str, flag) {
-        return str.replace(flag ? /([/?*:|"<>~\\])/g : /([/?*:|"<>~])/g, PxContentNew.toFull);
+        return str.replace(flag ? /([/?*:|"<>~\\])/g : /([/?*:|"<>~])/g, PxContent.toFull);
     }
 
     static toHalf(str) {
