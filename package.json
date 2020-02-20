@@ -9,7 +9,7 @@
     "build": "gulp build",
     "clean": "gulp clean",
     "scripts": "gulp scripts",
-    "libraries": "cd ./vendor/jszip && npm run test-browser && cd ../gif.js && npm run build && cd ../.. && gulp copy"
+    "libraries": "cd ./vendor/jszip && npx grunt build && cd ../gif.js && npm run build && cd ../.. && gulp copy"
   },
   "repository": {
     "type": "git",
@@ -26,15 +26,15 @@
   },
   "homepage": "https://github.com/rndomhack/px-downloader#readme",
   "devDependencies": {
-    "@babel/core": "^7.3.4",
-    "@babel/preset-env": "^7.3.4",
-    "@babel/register": "^7.0.0",
-    "babel-loader": "^8.0.5",
-    "del": "^4.0.0",
-    "gulp": "^4.0.0",
-    "gulp-zip": "^4.2.0",
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
+    "@babel/register": "^7.8.3",
+    "babel-loader": "^8.0.6",
+    "del": "^5.1.0",
+    "gulp": "^4.0.2",
+    "gulp-zip": "^5.0.1",
     "vinyl-named": "^1.1.0",
-    "webpack": "^4.29.6",
+    "webpack": "^4.41.6",
     "webpack-stream": "^5.2.1"
   }
 }
