@@ -23,44 +23,22 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     };
 
-    const script = document.createElement("script");
-
-    script.textContent = `
-        (() => {
-            "use strict";
-
-            const nativePushState = window.history.pushState;
-
-            window.history.pushState = (...args) => {
-                nativePushState.apply(window.history, args);
-
-                window.postMessage({
-                    type: "pxPushState",
-                    data: null
-                }, "*");
-            };
-
-            window.addEventListener("popstate", () => {
-                window.postMessage({
-                    type: "pxPopState",
-                    data: null
-                }, "*");
-            });
-        })();
-    `;
-
-    document.body.appendChild(script);
-
-    window.addEventListener("message", async event => {
-        const message = event.data;
-
-        if (typeof message !== "object") return;
-        if (message.type !== "pxPushState" && message.type !== "pxPopState") return;
-
-        init();
-    });
-
     window.addEventListener("load", () => {
-        init();
+        const observer = new MutationObserver(mutations => {
+            for (const mutation of mutations) {
+                for (const addedNode of mutation.addedNodes) {
+                    if (addedNode.querySelector("main section section, .work-interactions") === null) continue;
+
+                    init();
+
+                    return;
+                }
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
     });
 });
