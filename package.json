@@ -9,7 +9,7 @@
     "build": "gulp build",
     "clean": "gulp clean",
     "scripts": "gulp scripts",
-    "libraries": "cd ./vendor/jszip && ./node_modules/.bin/grunt build && cd ../gif.js && ./bin/build && cd ../.. && gulp copy"
+    "libraries": "cd ./vendor/jszip && npm run test-browser && cd ../gif.js && npm run build && cd ../.. && gulp copy"
   },
   "repository": {
     "type": "git",

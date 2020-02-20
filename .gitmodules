@@ -1,6 +1,6 @@
 [submodule "vendor/gif.js"]
 	path = vendor/gif.js
-	url = https://github.com/jnordberg/gif.js.git
+	url = https://github.com/rndomhack/gif.js.git
 	ignore = dirty
 [submodule "vendor/jszip"]
 	path = vendor/jszip
