@@ -17,8 +17,8 @@ export default {
                             "@babel/preset-env",
                             {
                                 targets: {
-                                    chrome: 60,
-                                    firefox: 58
+                                    chrome: 72,
+                                    firefox: 65
                                 }
                             }
                         ]
