@@ -516,7 +516,8 @@ export default class PxContent extends EventEmitter {
 
         this.emit("message", browser.i18n.getMessage("phProcess"));
 
-        const gifWorkerBlob = await this.resource({ path: "lib/gif.worker.js", type: "text/javascript" });
+        const gifWorkerResponse = await this.resource("lib/gif.worker.js");
+        const gifWorkerBlob = await gifWorkerResponse.blob();
         const gif = new GIF({
             quality: 1,
             workers: 4,
@@ -642,7 +643,8 @@ export default class PxContent extends EventEmitter {
         for (let i = 0; i < itemUrls.length; i++) {
             const itemUrl = itemUrls[i];
 
-            const itemText = await this.util.fetch({ url: itemUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
+            const itemResponse = await this.fetch(itemUrl, { credentials: "include", referrer: this.url.href });
+            const itemText = await itemResponse.text();
             const itemDomParser = new DOMParser();
             const itemDocument = itemDomParser.parseFromString(itemText, "text/html");
 
@@ -671,7 +673,8 @@ export default class PxContent extends EventEmitter {
         for (let i = 0; i < itemUrls.length; i++) {
             const itemUrl = itemUrls[i];
 
-            const itemText = await this.util.fetch({ url: itemUrl, type: "text", init: { credentials: "include", referrer: this.url.href } });
+            const itemResponse = await this.fetch(itemUrl, { credentials: "include", referrer: this.url.href });
+            const itemText = await itemResponse.text();
             const itemDomParser = new DOMParser();
             const itemDocument = itemDomParser.parseFromString(itemText, "text/html");
 
@@ -870,43 +873,67 @@ export default class PxContent extends EventEmitter {
         });
     }
 
-    resource(options) {
+    async resource(path) {
+        let response;
+
         if (this.util.browser === "chrome") {
-            return this.util.message({
+            const blobUrl = await this.util.message({
                 type: "resource",
-                data: {
-                    path: options.path,
-                    type: options.type
-                }
-            }).then(blobUrl => {
-                return this.util.fetch({ url: blobUrl, type: "blob" }).then(blob => {
-                    return blob;
-                });
+                data: { path }
             });
+
+            response = await fetch(blobUrl);
         } else if (this.util.browser === "firefox") {
-            return this.util.message({
+            const blob = await this.util.message({
                 type: "resource",
-                data: {
-                    path: options.path,
-                    type: options.type
+                data: { path }
+            });
+
+            response = new Proxy({}, {
+                get(target, key) {
+                    switch(key) {
+                        case "blob": {
+                            return async () => blob;
+                        }
+
+                        case "arrayBuffer":
+                        case "formData":
+                        case "json":
+                        case "text": {
+                            return async () => {
+                                const blobUrl = URL.createObjectURL(blob);
+                                const blobResponse = await fetch(blobUrl);
+                                const blobContent = await blobResponse[key]();
+
+                                URL.revokeObjectURL(blobUrl);
+
+                                return blobContent;
+                            }
+                        }
+
+                        default: {
+                            return target[key];
+                        }
+                    }
                 }
             });
         } else {
-            return this.util.message({
+            const dataUrl = await this.util.message({
                 type: "resource",
-                data: {
-                    path: options.path,
-                    type: options.type
-                }
-            }).then(dataUrl => {
-                return this.util.fetch({ url: dataUrl, type: "blob" });
+                data: { path }
             });
+
+            response = await fetch(dataUrl);
         }
+
+        return response;
     }
 
-    download(options) {
+    async download(options) {
+        let downloadId;
+
         if (this.util.browser === "chrome") {
-            return this.util.message({
+            downloadId = await this.util.message({
                 type: "download",
                 data: {
                     blobUrl: URL.createObjectURL(options.blob),
@@ -915,7 +942,7 @@ export default class PxContent extends EventEmitter {
                 }
             });
         } else if (this.util.browser === "firefox") {
-            return this.util.message({
+            downloadId = await this.util.message({
                 type: "download",
                 data: {
                     blob: options.blob,
@@ -924,8 +951,21 @@ export default class PxContent extends EventEmitter {
                 }
             });
         } else {
-            return this.util.read({ blob: options.blob, type: "dataurl" }).then(dataUrl => {
-                return this.util.message({
+            const dataUrl = await new Promise((resolve, reject) => {
+                const fileReader = new FileReader();
+
+                fileReader.addEventListener("load", () => {
+                    resolve(fileReader.result);
+                });
+
+                fileReader.addEventListener("error", err => {
+                    reject(err);
+                });
+
+                fileReader.readAsDataURL(options.blob);
+            });
+
+            downloadId = await this.util.message({
                     type: "download",
                     data: {
                         dataUrl: dataUrl,
@@ -933,8 +973,9 @@ export default class PxContent extends EventEmitter {
                         conflictAction: options.conflictAction
                     }
                 });
-            });
         }
+
+        return downloadId;
     }
 
     static escape(str, flag) {

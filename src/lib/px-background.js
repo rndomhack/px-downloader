@@ -54,19 +54,35 @@ export default class PxBackground {
         }
     }
 
-    async resource(options) {
+
+    async resource({ path }) {
         if (this.util.browser === "chrome") {
-            const blob = await this.util.fetch({ url: browser.runtime.getURL(options.path), type: "blob" });
+            const response = await fetch(browser.runtime.getURL(path));
+            const blob = await response.blob();
             const blobUrl = URL.createObjectURL(blob);
 
             return blobUrl;
         } else if (this.util.browser === "firefox") {
-            const blob = await this.util.fetch({ url: browser.runtime.getURL(options.path), type: "blob" });
+            const response = await fetch(browser.runtime.getURL(path));
+            const blob = await response.blob();
 
             return blob;
         } else {
-            const blob = await this.util.fetch({ url: browser.runtime.getURL(options.path), type: "blob" });
-            const dataUrl = await this.util.read({ blob: blob, type: "dataurl"});
+            const response = await fetch(browser.runtime.getURL(path));
+            const blob = await response.blob();
+            const dataUrl = await new Promise((resolve, reject) => {
+                const fileReader = new FileReader();
+
+                fileReader.addEventListener("load", () => {
+                    resolve(fileReader.result);
+                });
+
+                fileReader.addEventListener("error", err => {
+                    reject(err);
+                });
+
+                fileReader.readAsDataURL(blob);
+            });
 
             return dataUrl;
         }
@@ -100,7 +116,8 @@ export default class PxBackground {
 
             return downloadId;
         } else {
-            const blob = await this.util.fetch({ url: options.dataUrl, type: "blob" });
+            const response = await fetch(options.dataUrl);
+            const blob = await response.blob();
             const blobUrl = URL.createObjectURL(blob);
 
             const downloadId = await browserDownload({
