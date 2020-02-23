@@ -37,6 +37,7 @@
         "storage",
         "downloads",
         "*://*.pixiv.net/",
-        "*://*.pximg.net/"
+        "*://*.pximg.net/",
+        "*://*.techorus-cdn.com/"
     ]
 }

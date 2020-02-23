@@ -348,7 +348,7 @@ export default class PxContent extends EventEmitter {
 
         const imageUrl = this.data.urls[options.singleSize];
 
-        const imageRespose = await this.fetch(imageUrl, { credentials: "include", referrer: this.url.href });
+        const imageRespose = await fetch(imageUrl, { credentials: "include", referrer: this.url.href });
         let imageBlob = await imageRespose.blob();
 
         if (options.convertMode !== "none") {
@@ -385,7 +385,7 @@ export default class PxContent extends EventEmitter {
         for (let i = 0; i < imageUrls.length; i++) {
             const imageUrl = imageUrls[i];
 
-            const imageRespose = await this.fetch(imageUrl, { credentials: "include", referrer: this.url.href });
+            const imageRespose = await fetch(imageUrl, { credentials: "include", referrer: this.url.href });
             const imageBlob = await imageRespose.blob();
 
             this.emit("message", `${browser.i18n.getMessage("phFetch")}: ${Math.floor(((i + 1) / imageUrls.length) * 100)}%`);
@@ -439,7 +439,7 @@ export default class PxContent extends EventEmitter {
 
         const zipUrl = ugoiraData[{regular: "src", original: "originalSrc"}[options.ugoiraSize]];
 
-        const zipResponse = await this.fetch(zipUrl, { credentials: "include", referrer: this.url.href });
+        const zipResponse = await fetch(zipUrl, { credentials: "include", referrer: this.url.href });
         const zipArrayBuffer = await zipResponse.arrayBuffer();
 
         let blob;
@@ -643,7 +643,7 @@ export default class PxContent extends EventEmitter {
         for (let i = 0; i < itemUrls.length; i++) {
             const itemUrl = itemUrls[i];
 
-            const itemResponse = await this.fetch(itemUrl, { credentials: "include", referrer: this.url.href });
+            const itemResponse = await fetch(itemUrl, { credentials: "include", referrer: this.url.href });
             const itemText = await itemResponse.text();
             const itemDomParser = new DOMParser();
             const itemDocument = itemDomParser.parseFromString(itemText, "text/html");
@@ -673,7 +673,7 @@ export default class PxContent extends EventEmitter {
         for (let i = 0; i < itemUrls.length; i++) {
             const itemUrl = itemUrls[i];
 
-            const itemResponse = await this.fetch(itemUrl, { credentials: "include", referrer: this.url.href });
+            const itemResponse = await fetch(itemUrl, { credentials: "include", referrer: this.url.href });
             const itemText = await itemResponse.text();
             const itemDomParser = new DOMParser();
             const itemDocument = itemDomParser.parseFromString(itemText, "text/html");
@@ -871,64 +871,6 @@ export default class PxContent extends EventEmitter {
                 reject(err);
             });
         });
-    }
-
-    async fetch(url, init = {}) {
-        let response;
-
-        if (/\.pximg\.net$/.test(new URL(url).hostname)) {
-            response = await fetch(url, init);
-        } else if (this.util.browser === "chrome") {
-            const blobUrl = await this.util.message({
-                type: "fetch",
-                data: { url, init }
-            });
-
-            response = await fetch(blobUrl);
-        } else if (this.util.browser === "firefox") {
-            const blob = await this.util.message({
-                type: "fetch",
-                data: { url, init }
-            });
-
-            response = new Proxy({}, {
-                get(target, key) {
-                    switch(key) {
-                        case "blob": {
-                            return async () => blob;
-                        }
-
-                        case "arrayBuffer":
-                        case "formData":
-                        case "json":
-                        case "text": {
-                            return async () => {
-                                const blobUrl = URL.createObjectURL(blob);
-                                const blobResponse = await fetch(blobUrl);
-                                const blobContent = await blobResponse[key]();
-
-                                URL.revokeObjectURL(blobUrl);
-
-                                return blobContent;
-                            }
-                        }
-
-                        default: {
-                            return target[key];
-                        }
-                    }
-                }
-            });
-        } else {
-            const dataUrl = await this.util.message({
-                type: "fetch",
-                data: { url, init }
-            });
-
-            response = await fetch(dataUrl);
-        }
-
-        return response;
     }
 
     async resource(path) {
