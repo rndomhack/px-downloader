@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Px Downloader",
-    "version": "3.4.3",
+    "version": "3.4.4",
     "default_locale": "en",
     "description": "__MSG_extDescription__",
     "author": "rndomhack",
