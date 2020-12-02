@@ -1,73 +1,83 @@
-.px-button
-{
-    font-weight: bold;
-    line-height: 30px;
-
-    display: inline-block;
-
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-
-    color: #fff;
-    border-radius: 4px;
-    background-color: #009cff;
-}
-
-.px-button:hover
-{
-    text-decoration: none;
-
-    background-color: #008fea;
-}
-
-.px-button.off
-{
-    cursor: default;
-
-    color: #666;
-    background-color: #eee;
-}
-
-.px-button.off:hover
-{
-    text-decoration: none;
-}
-
-.px-downloaded
-{
-    display: flex;
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 6px;
-    height: 12px;
-    border-radius: 0 0 0 4px;
-    background-color: rgba(0,0,0,0.4);
-    line-height: 1;
-    font-size: 12px;
-    color: #fff;
-}
-
-.px-button-new
-{
+.px-button {
+    margin-right: 20px;
+    padding: 0;
     background: none;
     border: none;
-    color: #333;
-    cursor: pointer;
-    display: inline-block;
-    font-weight: 700;
-    height: 32px;
     line-height: 32px;
-    padding: 0;
+    font-weight: 700;
+    cursor: pointer;
 }
 
-.px-button-new.off
-{
-    color: #bbb;
+.px-button:not(.mobile) {
+    color: inherit;
+}
+
+.px-button.mobile {
+    order: 0;
+    margin-right: auto;
+    line-height: 22px;
+    font-size: 14px;
+}
+
+.px-button:disabled {
     cursor: default;
 }
 
-.px-button-new span {
+.px-button:disabled span {
+    opacity: 0.5;
+}
+
+.px-button span {
     vertical-align: middle;
+}
+
+.px-button svg {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    margin-right: 4px;
+    fill: currentColor;
+}
+
+.px-button svg mask path {
+    transition: fill 0.2s ease 0s;
+    fill: rgb(0, 0, 0);
+}
+
+.px-button.downloaded svg mask path {
+    fill: rgb(255, 255, 255);
+}
+
+.px-button + .work-interactions-like {
+    order: -1;
+    margin-right: 12px !important;
+}
+
+.px-icon {
+    display: block;
+    box-sizing: content-box;
+    padding: 0px;
+    color: rgb(31, 31, 31);
+    background: rgba(0, 0, 0, 0) none repeat scroll 0% 0%;
+    border: medium none;
+    line-height: 1;
+    height: 32px;
+    cursor: pointer;
+}
+
+.px-icon svg {
+    box-sizing: border-box;
+    line-height: 0;
+    font-size: 0px;
+    vertical-align: top;
+    transition: color 0.2s ease 0s, fill 0.2s ease 0s;
+    fill: currentcolor;
+}
+
+.px-icon.downloaded svg {
+    fill: rgb(64, 255, 128);
+}
+
+.px-icon:not(.downloaded) svg path:last-child {
+    fill: rgb(255, 255, 255);
 }

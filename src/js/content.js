@@ -1,44 +1,58 @@
 import PxContent from "../lib/px-content";
 
 document.addEventListener("DOMContentLoaded", () => {
-    let promise = Promise.resolve();
-
     let pxContent = null;
 
-    const init = function () {
-        promise = promise.then(async () => {
+    function init() {
+        try {
             if (pxContent !== null) {
                 pxContent.removeButton();
             }
 
             pxContent = new PxContent();
 
-            await pxContent.init();
-
             if (pxContent.check()) {
                 pxContent.addButton();
             }
-        }).catch(err => {
+        } catch(err) {
             console.error(err);
-        });
+        }
     };
 
-    window.addEventListener("load", () => {
-        const observer = new MutationObserver(mutations => {
-            for (const mutation of mutations) {
-                for (const addedNode of mutation.addedNodes) {
-                    if (addedNode.querySelector("main section section, .work-interactions") === null) continue;
+    window.addEventListener("message", async event => {
+        const message = event.data;
 
-                    init();
+        if (typeof message !== "object") return;
+        if (message.type !== "pxPushState" && message.type !== "pxPopState") return;
 
-                    return;
-                }
-            }
-        });
-
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+        init();
     });
+
+    const script = document.createElement("script");
+
+    script.textContent = `
+        "use strict";
+
+        const nativePushState = window.history.pushState;
+
+        window.history.pushState = (...args) => {
+            nativePushState.apply(window.history, args);
+
+            window.postMessage({
+                type: "pxPushState",
+                data: null
+            }, "*");
+        };
+
+        window.addEventListener("popstate", () => {
+            window.postMessage({
+                type: "pxPopState",
+                data: null
+            }, "*");
+        });
+    `;
+
+    document.body.appendChild(script);
+
+    init();
 });

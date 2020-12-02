@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Px Downloader",
-    "version": "3.4.4",
+    "version": "3.5.0",
     "default_locale": "en",
     "description": "__MSG_extDescription__",
     "author": "rndomhack",
@@ -18,8 +18,7 @@
         "default_title": "Px Downloader"
     },
     "background": {
-        "scripts": ["lib/browser.js", "js/background.js"],
-        "persistent": false
+        "scripts": ["lib/browser.js", "js/background.js"]
     },
     "content_scripts": [
         {
@@ -36,8 +35,15 @@
     "permissions": [
         "storage",
         "downloads",
+        "webRequest",
+        "webRequestBlocking",
         "*://*.pixiv.net/",
         "*://*.pximg.net/",
         "*://*.techorus-cdn.com/"
-    ]
+    ],
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "{a3650a89-273e-474b-9e32-46ba5397cf46}"
+        }
+    }
 }

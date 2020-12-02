@@ -21,6 +21,7 @@ export default class PxBackground {
         this.util = new ExtensionUtil();
 
         // Init message listeners
+        this.util.addListener("fetch", this.fetch.bind(this));
         this.util.addListener("resource", this.resource.bind(this));
         this.util.addListener("download", this.download.bind(this));
 
@@ -34,13 +35,13 @@ export default class PxBackground {
             browser.runtime.openOptionsPage();
         });
 
-        // Init onDeterminingFilename listener
         if (this.util.browser === "chrome") {
             this.util.getOptions("forceFilename").then(options => {
                 if (options.forceFilename !== 1) return;
 
                 this.downloadItemSuggestions = new Map();
 
+                // Init onDeterminingFilename listener
                 browser.downloads.onDeterminingFilename.addListener((downloadItem, suggest) => {
                     if (!this.downloadItemSuggestions.has(downloadItem.id)) return;
 
@@ -51,6 +52,78 @@ export default class PxBackground {
                     this.downloadItemSuggestions.delete(downloadItem.id);
                 });
             });
+
+            // Init onHeadersReceived listener
+            browser.webRequest.onHeadersReceived.addListener(
+                details => {
+                    const responseHeader = details.responseHeaders.find(_responseHeader => _responseHeader.name.toLowerCase() === "access-control-allow-origin");
+
+                    if (responseHeader === undefined) {
+                        details.responseHeaders.push({
+                            name: "Access-Control-Allow-Origin",
+                            value: "*"
+                        })
+                    } else {
+                        responseHeader.value = "*";
+                    }
+
+                    return { responseHeaders: details.responseHeaders };
+                },
+                { urls: ["*://*.pximg.net/*"] },
+                ["blocking", "responseHeaders", "extraHeaders"]
+            );
+
+            // browser.webRequest.onBeforeSendHeaders.addListener(
+            //     details => {
+            //         const requestHeader = details.requestHeaders.find(_requestHeader => _requestHeader.name.toLowerCase() === "referer");
+
+            //         if (requestHeader === undefined) {
+            //             details.requestHeaders.push({
+            //                 name: "Referer",
+            //                 value: "https://www.pixiv.net/"
+            //             })
+            //         } else {
+            //             requestHeader.value = "https://www.pixiv.net/";
+            //         }
+
+            //         return { requestHeaders: details.requestHeaders };
+            //     },
+            //     { urls: ["*://*.pximg.net/*"] },
+            //     ["blocking", "requestHeaders", "extraHeaders"]
+            // );
+        }
+    }
+
+    async fetch({ resource, init }) {
+        if (this.util.browser === "chrome") {
+            const response = await fetch(resource, init);
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+
+            return blobUrl;
+        } else if (this.util.browser === "firefox") {
+            const response = await fetch(resource, init);
+            const blob = await response.blob();
+
+            return blob;
+        } else {
+            const response = await fetch(resource, init);
+            const blob = await response.blob();
+            const dataUrl = await new Promise((resolve, reject) => {
+                const fileReader = new FileReader();
+
+                fileReader.addEventListener("load", () => {
+                    resolve(fileReader.result);
+                });
+
+                fileReader.addEventListener("error", err => {
+                    reject(err);
+                });
+
+                fileReader.readAsDataURL(blob);
+            });
+
+            return dataUrl;
         }
     }
 

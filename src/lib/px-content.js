@@ -35,32 +35,20 @@ function getImageElement(url) {
 }
 
 export default class PxContent extends EventEmitter {
-    constructor({url, doc} = {}) {
+    constructor({util, url} = {}) {
         super();
 
-        this.util = new ExtensionUtil();
-        this.url = new URL(url || location.href);
-        this.document = doc || document;
+        this.util = util || new ExtensionUtil();
+
+        this.url = url || new URL(location.href);
 
         this.button = null;
     }
 
-    check() {
-        return this.page !== "";
-    }
+    get page() {
+        if (this.hasOwnProperty("_page")) return this._page;
 
-    async init() {
-        this.page = this.getPage();
-
-        if (this.page === "illust" || this.page === "novel") {
-            this.data = await this.getData();
-            this.userData = await this.getUserData();
-            this.macro = this.getMacro();
-        }
-    }
-
-    getPage() {
-        let page = "";
+        let page;
 
         if (/\/artworks\/\d+/.test(this.url.pathname)) {
             page = "illust";
@@ -72,81 +60,94 @@ export default class PxContent extends EventEmitter {
             page = "imageSeries";
         } else if (this.url.pathname === "/novel/member.php") {
             page = "novelList";
-        } else if (this.url.pathname === "/series.php" && this.url.searchParams.get("id") !== null) {
+        } else if (/\/novel\/series\/\d+/.test(this.url.pathname)) {
             page = "novelSeries";
+        } else {
+            page = "";
         }
+
+        this._page = page;
 
         return page;
     }
 
-    async getData() {
-        let data = null;
+    get id() {
+        if (this.hasOwnProperty("_id")) return this._id;
 
-        if (this.page === "illust") {
-            const id = location.pathname.match(/\/artworks\/(\d+)/)[1];
-            const response = await fetch(`https://www.pixiv.net/ajax/illust/${id}`, { credentials: "include" });
-            const json = await response.json();
+        let id;
 
-            data = json.body;
-        } else if (this.page === "novel") {
-            const response = await fetch(`https://www.pixiv.net/ajax/novel/${this.url.searchParams.get("id")}`, { credentials: "include" });
-            const json = await response.json();
+        switch (this.page) {
+            case "illust": {
+                id = this.url.pathname.match(/\/artworks\/(\d+)/)[1];
 
-            data = json.body;
+                break;
+            }
+
+            case "novel": {
+                id = this.url.searchParams.get("id");
+
+                break;
+            }
+
+            case "novelSeries": {
+                id = this.url.pathname.match(/\/novel\/series\/(\d+)/)[1]
+
+                break;
+            }
+
+            default: {
+                id = "";
+
+                break;
+            }
         }
 
-        return data;
+        this._id = id;
+
+        return id;
     }
 
-    async getUserData() {
-        const response = await fetch(`https://www.pixiv.net/ajax/user/${this.data.userId}`, { credentials: "include" });
-        const json = await response.json();
-        const data = json.body;
-
-        return data;
+    check() {
+        return this.page !== "";
     }
 
-    getMacro() {
+    getMacro(data) {
         const macro = {};
 
-        if (this.data.hasOwnProperty("illustId")) {
-            macro.id = this.data.illustId;
-        } else if (this.data.hasOwnProperty("id")) {
-            macro.id = this.data.id;
+        if (data.hasOwnProperty("id")) {
+            macro.id = data.id;
         } else {
             macro.id = "";
         }
 
-        if (this.data.hasOwnProperty("illustTitle")) {
-            macro.title = this.data.illustTitle;
-        } else if (this.data.hasOwnProperty("title")) {
-            macro.title = this.data.title;
+        if (data.hasOwnProperty("title")) {
+            macro.title = data.title;
         } else {
             macro.title = "";
         }
 
-        if (this.data.hasOwnProperty("userId")) {
-            macro.userId = this.data.userId;
+        if (data.hasOwnProperty("userId")) {
+            macro.userId = data.userId;
         } else {
             macro.userId = "";
         }
 
-        if (this.userData.hasOwnProperty("name")) {
-            macro.userName = this.userData.name;
+        if (data.hasOwnProperty("userName")) {
+            macro.userName = data.userName;
         } else {
             macro.userName = "";
         }
 
-        if (this.data.hasOwnProperty("seriesNavData") && this.data.seriesNavData !== null) {
-            macro.seriesTitle = this.data.seriesNavData.title;
-            macro.seriesId = this.data.seriesNavData.seriesId;
+        if (data.hasOwnProperty("seriesNavData") && data.seriesNavData !== null) {
+            macro.seriesId = data.seriesNavData.seriesId;
+            macro.seriesTitle = data.seriesNavData.title;
         } else {
-            macro.seriesName = "";
             macro.seriesId = "";
+            macro.seriesTitle = "";
         }
 
-        if (this.data.hasOwnProperty("createDate")) {
-            const date = new Date(this.data.createDate);
+        if (data.hasOwnProperty("createDate")) {
+            const date = new Date(data.createDate);
 
             macro.YYYY = date.getFullYear().toString();
             macro.YY = date.getFullYear().toString().slice(-2);
@@ -176,33 +177,55 @@ export default class PxContent extends EventEmitter {
         return macro;
     }
 
-    getDownloaded() {
-        if (!this.macro.hasOwnProperty("id")) return false;
+    replaceMacro(macro, str, index) {
+        if (index !== undefined) {
+            let _macro = {};
 
+            _macro.index = index.toString();
+            _macro.index2 = index.toString().padStart(2, "0");
+            _macro.index3 = index.toString().padStart(3, "0");
+            _macro.index4 = index.toString().padStart(4, "0");
+
+            _macro.page = (index + 1).toString();
+            _macro.page2 = (index + 1).toString().padStart(2, "0");
+            _macro.page3 = (index + 1).toString().padStart(3, "0");
+            _macro.page4 = (index + 1).toString().padStart(4, "0");
+
+            macro = Object.assign({}, macro, _macro);
+        }
+
+        for (const [key, value] of Object.entries(macro)) {
+            str = str.split("${" + key + "}").join(PxContent.escape(value, true));
+        }
+
+        return str;
+    }
+
+    getDownloaded(id) {
         const value = localStorage.getItem("pxDownloaded");
 
         if (value === null) return false;
 
         const downloaded = JSON.parse(value);
 
-        if (!downloaded.includes(this.macro.id)) return false;
+        if (!downloaded.includes(id)) return false;
 
         return true;
     }
 
-    setDownloaded() {
+    setDownloaded(id) {
         let value = localStorage.getItem("pxDownloaded");
 
         let downloaded = value === null ? [] : JSON.parse(value);
 
-        if (downloaded.includes(this.macro.id)) {
-            downloaded.splice(downloaded.indexOf(this.macro.id), 1);
+        if (downloaded.includes(id)) {
+            downloaded.splice(downloaded.indexOf(id), 1);
         }
 
-        downloaded.push(this.macro.id);
+        downloaded.push(id);
 
-        if (downloaded.length > 1000) {
-            downloaded = downloaded.slice(-1000);
+        if (downloaded.length > 10000) {
+            downloaded = downloaded.slice(-10000);
         }
 
         value = JSON.stringify(downloaded);
@@ -210,13 +233,13 @@ export default class PxContent extends EventEmitter {
         localStorage.setItem("pxDownloaded", value);
     }
 
-    getFilename(options) {
+    getFilename(macro, base, ext, index) {
         let filename;
 
-        if (options.hasOwnProperty("index")) {
-            filename = `${this.replacePageMacro(options.multiFilename, options.index)}.${options.ext}`;
+        if (index === undefined) {
+            filename = `${this.replaceMacro(macro, base)}.${ext}`;
         } else {
-            filename = `${this.replaceMacro(options.singleFilename)}.${options.ext}`;
+            filename = `${this.replaceMacro(macro, base, index)}.${ext}`;
         }
 
         filename = filename.replace(/\/+/g, "/").replace(/(^|\/)\./g, "$1\uFF0E").replace(/\.($|\/)/g, "\uFF0E$1").replace(/^\//, "");
@@ -268,53 +291,12 @@ export default class PxContent extends EventEmitter {
         return ext;
     }
 
-    replaceMacro(str) {
-        for (const key of Object.keys(this.macro)) {
-            str = str.split("${" + key + "}").join(PxContent.escape(this.macro[key], true));
-        }
-
-        return str;
-    }
-
-    replacePageMacro(str, index) {
-        const macro = {};
-
-        macro.index = index.toString();
-        macro.index2 = index.toString().padStart(2, "0");
-        macro.index3 = index.toString().padStart(3, "0");
-        macro.index4 = index.toString().padStart(4, "0");
-
-        macro.page = (index + 1).toString();
-        macro.page2 = (index + 1).toString().padStart(2, "0");
-        macro.page3 = (index + 1).toString().padStart(3, "0");
-        macro.page4 = (index + 1).toString().padStart(4, "0");
-
-        Object.assign(macro, this.macro);
-
-        for (const key of Object.keys(macro)) {
-            str = str.split("${" + key + "}").join(PxContent.escape(macro[key], true));
-        }
-
-        return str;
-    }
-
     async downloadPixiv() {
         const options = await this.util.getOptions(Object.keys(defaultOptions));
 
         switch (this.page) {
             case "illust": {
-                if (this.data.illustType === 2) {
-                    // ugoira
-                    await this.downloadUgoira(options);
-
-                } else if (this.data.pageCount !== 1) {
-                    // multiple
-                    await this.downloadMultiple(options);
-
-                } else {
-                    // illust
-                    await this.downloadIllust(options);
-                }
+                await this.downloadIllust(options);
 
                 break;
             }
@@ -327,28 +309,53 @@ export default class PxContent extends EventEmitter {
 
             case "imageList":
             case "imageSeries": {
-                await this.downloadImageList(options);
+                await this.downloadImageList();
 
                 break;
             }
 
-            case "novelList":
+            case "novelList": {
+                await this.downloadNovelList();
+
+                break;
+            }
+
             case "novelSeries": {
-                await this.downloadNovelList(options);
+                await this.downloadNovelSeries();
 
                 break;
             }
         }
 
-        this.setDownloaded();
+        this.setDownloaded(`${this.page}_${this.id}`);
     }
 
     async downloadIllust(options) {
         this.emit("message", browser.i18n.getMessage("phFetch"));
 
-        const imageUrl = this.data.urls[options.singleSize];
+        const response = await fetch(`https://www.pixiv.net/ajax/illust/${this.id}`, { credentials: "include" });
+        const json = await response.json();
 
-        const imageRespose = await fetch(imageUrl, { credentials: "include", referrer: this.url.href });
+        const data = json.body;
+
+        if (data.illustType === 2) {
+            // ugoira
+            await this.downloadUgoira(options, data);
+
+        } else if (data.pageCount !== 1) {
+            // multiple
+            await this.downloadMultiple(options, data);
+
+        } else {
+            // single
+            await this.downloadSingle(options, data);
+        }
+    }
+
+    async downloadSingle(options, data) {
+        const imageUrl = data.urls[options.singleSize];
+
+        const imageRespose = await fetch(imageUrl, { referrer: this.url.href });
         let imageBlob = await imageRespose.blob();
 
         if (options.convertMode !== "none") {
@@ -363,17 +370,17 @@ export default class PxContent extends EventEmitter {
 
         this.emit("message", browser.i18n.getMessage("phDownload"));
 
+        const macro = this.getMacro(data);
+
         await this.download({
             blob: imageBlob,
-            filename: this.getFilename({ singleFilename: options.singleFilename, ext: this.getExt(imageBlob) }),
+            filename: this.getFilename(macro, options.singleFilename, this.getExt(imageBlob)),
             conflictAction: options.conflictAction
         });
     }
 
-    async downloadMultiple(options) {
-        this.emit("message", browser.i18n.getMessage("phFetch"));
-
-        const response = await fetch(`https://www.pixiv.net/ajax/illust/${this.data.illustId}/pages`, { credentials: "include" });
+    async downloadMultiple(options, data) {
+        const response = await fetch(`https://www.pixiv.net/ajax/illust/${this.id}/pages`, { credentials: "include" });
         const json = await response.json();
 
         const pages = json.body;
@@ -385,7 +392,7 @@ export default class PxContent extends EventEmitter {
         for (let i = 0; i < imageUrls.length; i++) {
             const imageUrl = imageUrls[i];
 
-            const imageRespose = await fetch(imageUrl, { credentials: "include", referrer: this.url.href });
+            const imageRespose = await fetch(imageUrl, { referrer: this.url.href });
             const imageBlob = await imageRespose.blob();
 
             this.emit("message", `${browser.i18n.getMessage("phFetch")}: ${Math.floor(((i + 1) / imageUrls.length) * 100)}%`);
@@ -417,12 +424,14 @@ export default class PxContent extends EventEmitter {
 
         this.emit("message", browser.i18n.getMessage("phDownload"));
 
+        const macro = this.getMacro(data);
+
         for (let i = 0; i < imageBlobs.length; i++) {
             const imageBlob = imageBlobs[i];
 
             await this.download({
                 blob: imageBlob,
-                filename: this.getFilename({ multiFilename: options.multiFilename, index: i, ext: this.getExt(imageBlob) }),
+                filename: this.getFilename(macro, options.multiFilename, this.getExt(imageBlob), i),
                 conflictAction: options.conflictAction
             });
 
@@ -430,41 +439,39 @@ export default class PxContent extends EventEmitter {
         }
     }
 
-    async downloadUgoira(options) {
-        this.emit("message", browser.i18n.getMessage("phFetch"));
-
-        const ugoiraResponse = await fetch(`https://www.pixiv.net/ajax/illust/${this.data.illustId}/ugoira_meta`, { credentials: "include" });
+    async downloadUgoira(options, data) {
+        const ugoiraResponse = await fetch(`https://www.pixiv.net/ajax/illust/${this.id}/ugoira_meta`, { credentials: "include" });
         const ugoiraJson = await ugoiraResponse.json();
         const ugoiraData = ugoiraJson.body;
 
         const zipUrl = ugoiraData[{regular: "src", original: "originalSrc"}[options.ugoiraSize]];
 
-        const zipResponse = await fetch(zipUrl, { credentials: "include", referrer: this.url.href });
+        const zipResponse = await fetch(zipUrl, { referrer: this.url.href });
         const zipArrayBuffer = await zipResponse.arrayBuffer();
 
         let blob;
 
         switch (options.ugoiraMode) {
             case "zip": {
-                blob = await this.convertUgoiraToZip(options, ugoiraData, zipArrayBuffer);
+                blob = await this.convertUgoiraToZip(options, data, ugoiraData, zipArrayBuffer);
 
                 break;
             }
 
             case "gif": {
-                blob = await this.convertUgoiraToGif(options, ugoiraData, zipArrayBuffer);
+                blob = await this.convertUgoiraToGif(options, data, ugoiraData, zipArrayBuffer);
 
                 break;
             }
 
             case "apng": {
-                blob = await this.convertUgoiraToApng(options, ugoiraData, zipArrayBuffer);
+                blob = await this.convertUgoiraToApng(options, data, ugoiraData, zipArrayBuffer);
 
                 break;
             }
 
             case "webp": {
-                blob = await this.convertUgoiraToWebp(options, ugoiraData, zipArrayBuffer);
+                blob = await this.convertUgoiraToWebp(options, data, ugoiraData, zipArrayBuffer);
 
                 break;
             }
@@ -472,14 +479,16 @@ export default class PxContent extends EventEmitter {
 
         this.emit("message", browser.i18n.getMessage("phDownload"));
 
+        const macro = this.getMacro(data);
+
         await this.download({
             blob: blob,
-            filename: this.getFilename({ singleFilename: options.singleFilename, ext: this.getExt(blob) }),
+            filename: this.getFilename(macro, options.singleFilename, this.getExt(blob)),
             conflictAction: options.conflictAction
         });
     }
 
-    async convertUgoiraToZip(options, ugoiraData, zipArrayBuffer) {
+    async convertUgoiraToZip(options, data, ugoiraData, zipArrayBuffer) {
         this.emit("message", browser.i18n.getMessage("phLoad"));
 
         const zipObject = await JSZip.loadAsync(zipArrayBuffer);
@@ -491,7 +500,7 @@ export default class PxContent extends EventEmitter {
         return zipBlob;
     }
 
-    async convertUgoiraToGif(options, ugoiraData, zipArrayBuffer) {
+    async convertUgoiraToGif(options, data, ugoiraData, zipArrayBuffer) {
         this.emit("message", browser.i18n.getMessage("phLoad"));
 
         const zipObject = await JSZip.loadAsync(zipArrayBuffer);
@@ -545,7 +554,7 @@ export default class PxContent extends EventEmitter {
         return imageBlob;
     }
 
-    async convertUgoiraToApng(options, ugoiraData, zipArrayBuffer) {
+    async convertUgoiraToApng(options, data, ugoiraData, zipArrayBuffer) {
         this.emit("message", browser.i18n.getMessage("phConvert"));
 
         const zipObject = await JSZip.loadAsync(zipArrayBuffer);
@@ -584,7 +593,7 @@ export default class PxContent extends EventEmitter {
         return imageBlob;
     }
 
-    async convertUgoiraToWebp(options, ugoiraData, zipArrayBuffer) {
+    async convertUgoiraToWebp(options, data, ugoiraData, zipArrayBuffer) {
         this.emit("message", browser.i18n.getMessage("phConvert"));
 
         const zipObject = await JSZip.loadAsync(zipArrayBuffer);
@@ -626,71 +635,48 @@ export default class PxContent extends EventEmitter {
     async downloadNovel(options) {
         this.emit("message", browser.i18n.getMessage("phFetch"));
 
-        const textBlob = new Blob([this.data.content.replace(/\r\n|\r|\n/g, "\r\n")], { type: "text/plain" });
+        const response = await fetch(`https://www.pixiv.net/ajax/novel/${this.id}`, { credentials: "include" });
+        const json = await response.json();
+
+        const data = json.body;
+
+        const textBlob = new Blob([data.content.replace(/\r\n|\r|\n/g, "\r\n")], { type: "text/plain" });
 
         this.emit("message", browser.i18n.getMessage("phDownload"));
 
+        const macro = this.getMacro(data);
+
         await this.download({
             blob: textBlob,
-            filename: this.getFilename({ singleFilename: options.novelFilename, ext: this.getExt(textBlob) }),
+            filename: this.getFilename(macro, options.novelFilename, this.getExt(textBlob)),
             conflictAction: options.conflictAction
         });
     }
 
-    async downloadImageList() {
-        const itemUrls = Array.from(document.querySelectorAll(".image-item a.work")).map(elem => new URL(elem.getAttribute("href"), this.url.href).href);
+    async downloadNovelSeries() {
+        const response = await fetch(`https://www.pixiv.net/ajax/novel/series_content/${this.id}`, { credentials: "include" });
+        const json = await response.json();
 
-        for (let i = 0; i < itemUrls.length; i++) {
-            const itemUrl = itemUrls[i];
+        const seriesContents = json.body.seriesContents;
 
-            const itemResponse = await fetch(itemUrl, { credentials: "include", referrer: this.url.href });
-            const itemText = await itemResponse.text();
-            const itemDomParser = new DOMParser();
-            const itemDocument = itemDomParser.parseFromString(itemText, "text/html");
+        const ids = seriesContents.map(seriesContent => seriesContent.id);
 
-            const itemPxContent = new PxContent({
-                url: itemUrl,
-                doc: itemDocument
+        for (let i = 0; i < ids.length; i++) {
+            const id = ids[i];
+
+            const pxContent = new PxContent({
+                util: this.util,
+                url: new URL(`https://www.pixiv.net/novel/show.php?id=${id}`)
             });
 
-            itemPxContent.on("message", message => {
-                this.emit("message", `[${i + 1} / ${itemUrls.length}]: ${message}`);
-            });
-
-            try {
-                await itemPxContent.downloadPixiv();
-            } catch (err) {
-                throw new Error(`[${i + 1} / ${itemUrls.length}]: ${err.message}`);
-            }
-
-            await sleep(250);
-        }
-    }
-
-    async downloadNovelList() {
-        const itemUrls = Array.from(document.querySelectorAll("._novel-item .title a")).map(elem => new URL(elem.getAttribute("href"), this.url.href).href);
-
-        for (let i = 0; i < itemUrls.length; i++) {
-            const itemUrl = itemUrls[i];
-
-            const itemResponse = await fetch(itemUrl, { credentials: "include", referrer: this.url.href });
-            const itemText = await itemResponse.text();
-            const itemDomParser = new DOMParser();
-            const itemDocument = itemDomParser.parseFromString(itemText, "text/html");
-
-            const itemPxContent = new PxContent({
-                url: itemUrl,
-                doc: itemDocument
-            });
-
-            itemPxContent.on("message", message => {
-                this.emit("message", `[${i + 1} / ${itemUrls.length}]: ${message}`);
+            pxContent.on("message", message => {
+                this.emit("message", `[${i + 1} / ${ids.length}]: ${message}`);
             });
 
             try {
-                await itemPxContent.downloadPixiv();
+                await pxContent.downloadPixiv();
             } catch (err) {
-                throw new Error(`[${i + 1} / ${itemUrls.length}]: ${err.message}`);
+                throw new Error(`[${i + 1} / ${ids.length}]: ${err.message}`);
             }
 
             await sleep(250);
@@ -720,81 +706,103 @@ export default class PxContent extends EventEmitter {
     addButtonWork() {
         const isMobile = document.querySelector("div#root") === null;
 
-        let parent;
+        // Button element
+        const button = document.createElement("button");
+
+        button.classList.add("px-button");
 
         if (isMobile) {
-            parent = document.querySelector(".work-interactions");
-        } else {
-            parent = document.querySelector("main section section");
+            button.classList.add("mobile");
+            button.classList.add("c-gray-90");
         }
-
-        if (parent === null) {
-            setTimeout(this.addButtonWork.bind(this), 100);
-            return;
-        }
-
-        const div = document.createElement("div");
-        const a = document.createElement("a");
-        const icon = document.createElement("span");
-        const span = document.createElement("span");
 
         const listener = async () => {
-            a.removeEventListener("click", listener);
-            a.classList.add("off");
+            button.removeEventListener("click", listener);
+            button.disabled = true;
 
             try {
                 await this.downloadPixiv();
 
                 span.textContent = browser.i18n.getMessage("phDone");
+                button.classList.add("downloaded");
             } catch (err) {
                 span.textContent = browser.i18n.getMessage("phRetry");
+                button.classList.remove("downloaded");
 
                 alert(err.message);
                 console.error(err);
             }
 
-            a.addEventListener("click", listener);
-            a.classList.remove("off");
-        };
-
-        div.style.marginRight = "20px";
-
-        a.classList.add("px-button-new");
-
-        icon.textContent = "⬇";
-
-        span.textContent = this.getDownloaded() ? browser.i18n.getMessage("phDone") : "Px Downloader";
-
-        a.addEventListener("click", listener);
-
-        a.appendChild(icon);
-        a.appendChild(span);
-        div.appendChild(a);
-
-        if (isMobile) {
-            div.classList.add("f-title-xs");
-            parent.insertBefore(div, parent.childNodes[1]);
-        } else {
-            parent.appendChild(div);
+            button.addEventListener("click", listener);
+            button.disabled = false;
         }
 
+        button.addEventListener("click", listener);
+
+        const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+        icon.setAttributeNS(null, "viewBox", "0 0 32 32");
+        icon.setAttributeNS(null, "width", "32");
+        icon.setAttributeNS(null, "height", "32");
+        icon.insertAdjacentHTML("beforeend", `
+            <mask id="mask">
+                <rect x="0" y="0" width="32" height="32" fill="white" />
+                <path d="M21.358 6.7v6.39H27L16 25.7 5 13.09h5.642V6.7z" />
+            </mask>
+            <path d="M10.64 5.1c-1.104 0-2 .716-2 1.6v4.8H5c-.745 0-1.428.332-1.773.86s-.294 1.167.133 1.656l11 12.61c.374.43.987.685 1.64.685s1.266-.256 1.64-.685l11-12.61c.426-.49.477-1.127.133-1.656S27.745 11.5 27 11.5h-3.644V6.7c-.001-.883-.895-1.6-2-1.6z" mask="url(#mask)" />
+        `);
+
+        button.appendChild(icon);
+
+        const span = document.createElement("span");
+
+        button.appendChild(span);
+
+        if (this.getDownloaded(`${this.page}_${this.id}`)) {
+            span.textContent =  browser.i18n.getMessage("phDone");
+            button.classList.add("downloaded");
+        } else {
+            span.textContent = "Px Downloader";
+        }
+
+        {
+            const parent = document.querySelector("main section div:first-child section, .work-interactions");
+
+            if (parent !== null) {
+                if (isMobile) {
+                    parent.insertBefore(button, parent.firstChild);
+                } else {
+                    parent.appendChild(button);
+                }
+            }
+        }
+
+        // Button listener
         const buttonListener = message => {
             span.textContent = message;
-        };
+        }
 
         this.on("message", buttonListener);
 
+        // Button observer
         const buttonObserver = new MutationObserver(mutations => {
-            const target = Array.from(document.querySelectorAll("main section section")).find(elem => elem.children.length > 2);
+            if (document.contains(button)) return;
 
-            if (target === void 0) return;
-            if (!mutations.some(mutation => Array.from(mutation.addedNodes).some(addedNode => addedNode.contains(target)))) return;
+            for (const mutation of mutations) {
+                for (const addedNode of mutation.addedNodes) {
+                    if (addedNode.nodeType !== Node.ELEMENT_NODE) continue;
 
-            if (this.button.element.parentElement !== null) {
-                this.button.element.parentElement.removeChild(this.button.element);
+                    const parent = addedNode.querySelector("main section div:first-child section, .work-interactions");
+
+                    if (parent === null) continue;
+
+                    if (isMobile) {
+                        parent.insertBefore(button, parent.firstChild);
+                    } else {
+                        parent.appendChild(button);
+                    }
+                }
             }
-
-            target.appendChild(this.button.element);
         });
 
         buttonObserver.observe(document, {
@@ -802,8 +810,9 @@ export default class PxContent extends EventEmitter {
             subtree: true
         });
 
+
         this.button = {
-            element: div,
+            element: button,
             listener: buttonListener,
             observer: buttonObserver
         };
@@ -832,13 +841,16 @@ export default class PxContent extends EventEmitter {
     removeButtonWork() {
         if (this.button === null) return;
 
-        if (this.button.element.parentElement !== null) {
-            this.button.element.parentElement.removeChild(this.button.element);
-        }
+        // Button observer
+        this.button.observer.disconnect();
 
+        // Button listener
         this.off("message", this.button.listener);
 
-        this.button.observer.disconnect();
+        // Button Element
+        if (this.button.element.parentNode !== null) {
+            this.button.element.parentNode.removeChild(this.button.element);
+        }
 
         this.button = null;
     }
@@ -871,6 +883,62 @@ export default class PxContent extends EventEmitter {
                 reject(err);
             });
         });
+    }
+
+    async fetch(resource, init) {
+        let response;
+
+        if (this.util.browser === "chrome") {
+            const blobUrl = await this.util.message({
+                type: "fetch",
+                data: { resource, init }
+            });
+
+            response = await fetch(blobUrl);
+        } else if (this.util.browser === "firefox") {
+            const blob = await this.util.message({
+                type: "fetch",
+                data: { resource, init }
+            });
+
+            response = new Proxy({}, {
+                get(target, key) {
+                    switch(key) {
+                        case "blob": {
+                            return async () => blob;
+                        }
+
+                        case "arrayBuffer":
+                        case "formData":
+                        case "json":
+                        case "text": {
+                            return async () => {
+                                const blobUrl = URL.createObjectURL(blob);
+                                const blobResponse = await fetch(blobUrl);
+                                const blobContent = await blobResponse[key]();
+
+                                URL.revokeObjectURL(blobUrl);
+
+                                return blobContent;
+                            }
+                        }
+
+                        default: {
+                            return target[key];
+                        }
+                    }
+                }
+            });
+        } else {
+            const dataUrl = await this.util.message({
+                type: "fetch",
+                data: { resource, init }
+            });
+
+            response = await fetch(dataUrl);
+        }
+
+        return response;
     }
 
     async resource(path) {
@@ -978,10 +1046,6 @@ export default class PxContent extends EventEmitter {
         return downloadId;
     }
 
-    static escape(str, flag) {
-        return str.replace(flag ? /([/?*:|"<>~\\])/g : /([/?*:|"<>~])/g, PxContent.toFull);
-    }
-
     static toHalf(str) {
         return str.replace(/[\uff01-\uff5e]/g, function(s) {
             return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
@@ -992,5 +1056,9 @@ export default class PxContent extends EventEmitter {
         return str.replace(/[!-~]/g, function(s) {
             return String.fromCharCode(s.charCodeAt(0) + 0xFEE0);
         }).split(" ").join("\u3000");
+    }
+
+    static escape(str, flag) {
+        return str.replace(flag ? /([/?*:|"<>~\\])/g : /([/?*:|"<>~])/g, PxContent.toFull);
     }
 }
