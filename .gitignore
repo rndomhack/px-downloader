@@ -60,4 +60,4 @@ typings/
 # private
 dist/js/
 dist/lib/
-/dist.zip
+web-ext-artifacts/

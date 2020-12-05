@@ -5,10 +5,12 @@
     <title>Px Downloader - Options</title>
     <link rel="stylesheet" href="../css/skyblue.min.css">
     <link rel="stylesheet" href="../css/options.css">
+    <script src="../lib/browser-polyfill.js"></script>
+    <script src="../js/options.js"></script>
 </head>
 <body>
     <div class="container" id="options">
-        <h2 i18n="settings"></h1>
+        <h2 i18n="settings"></h2>
         <a i18n="settingsReset" class="btn full" id="reset"></a>
         <label i18n="settingsSingleFilename"></label>
         <input class="form-control" type="text" id="singleFilename">
@@ -24,6 +26,11 @@
         </select>
         <label i18n="settingsForceFilename"></label>
         <select class="form-control" id="forceFilename">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+        <label i18n="settingsDisableShelf"></label>
+        <select class="form-control" id="disableShelf">
             <option value="0">No</option>
             <option value="1">Yes</option>
         </select>
@@ -161,8 +168,5 @@
             </tbody>
         </table>
     </div>
-
-    <script src="../lib/browser.js"></script>
-    <script src="../js/options.js"></script>
 </body>
 </html>

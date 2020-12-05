@@ -23,6 +23,9 @@
     "optSettingsForceFilename": {
         "message": "確保檔名依從標題 (要重新啟動)"
     },
+    "optSettingsDisableShelf": {
+        "message": "Disable download shelf"
+    },
     "optSettingsConflictActionUniquify": {
         "message": "另存新檔"
     },

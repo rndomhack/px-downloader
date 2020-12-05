@@ -144,24 +144,6 @@ class Writer {
     }
 }
 
-function blobUrlToArrayBuffer(blobUrl) {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-
-        xhr.addEventListener("load", () => {
-            resolve(xhr.response);
-        });
-
-        xhr.addEventListener("error", err => {
-            reject(err);
-        });
-
-        xhr.open("GET", blobUrl);
-        xhr.responseType = "arraybuffer";
-        xhr.send();
-    });
-}
-
 export default class Webp {
     constructor() {
         this.canvas = document.createElement("canvas");
@@ -320,7 +302,8 @@ export default class Webp {
 
             const blobUrl = URL.createObjectURL(frame.blob);
 
-            const arrayBuffer = await blobUrlToArrayBuffer(blobUrl);
+            const response = await fetch(blobUrl);
+            const arrayBuffer = await response.arrayBuffer();
 
             URL.revokeObjectURL(blobUrl);
 

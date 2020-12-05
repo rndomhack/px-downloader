@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 pxContent.removeButton();
             }
 
-            pxContent = new PxContent();
+            pxContent = new PxContent(location.href);
 
             if (pxContent.check()) {
                 pxContent.addButton();
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    window.addEventListener("message", async event => {
+    window.addEventListener("message", async (event) => {
         const message = event.data;
 
         if (typeof message !== "object") return;

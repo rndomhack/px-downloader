@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Px Downloader",
-    "version": "3.5.0",
+    "version": "3.6.0",
     "default_locale": "en",
     "description": "__MSG_extDescription__",
     "author": "rndomhack",
@@ -18,13 +18,13 @@
         "default_title": "Px Downloader"
     },
     "background": {
-        "scripts": ["lib/browser.js", "js/background.js"]
+        "scripts": ["lib/browser-polyfill.js", "lib/jszip.min.js", "lib/gif.js", "js/background.js"]
     },
     "content_scripts": [
         {
             "matches": ["*://*.pixiv.net/*"],
             "css": ["css/content.css"],
-            "js": ["lib/browser.js", "lib/jszip.min.js", "lib/gif.js", "js/content.js"],
+            "js": ["lib/browser-polyfill.js", "js/content.js"],
             "run_at": "document_start"
         }
     ],
@@ -35,6 +35,7 @@
     "permissions": [
         "storage",
         "downloads",
+        "downloads.shelf",
         "webRequest",
         "webRequestBlocking",
         "*://*.pixiv.net/",

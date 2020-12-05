@@ -1,15 +1,14 @@
 {
   "name": "px-downloader",
-  "version": "3.4.4",
+  "version": "3.6.0",
   "description": "Download illust, manga, ugoira(animation) and novel from Pixiv",
   "main": "index.js",
   "scripts": {
-    "postinstall": "cd ./vendor/jszip && npm i && cd ../gif.js && npm i",
-    "watch": "gulp watch",
-    "build": "gulp build",
-    "clean": "gulp clean",
-    "scripts": "gulp scripts",
-    "libraries": "cd ./vendor/jszip && npx grunt build && cd ../gif.js && npm run build && cd ../.. && gulp copy"
+    "chromium:start": "web-ext run -t chromium --source-dir ./dist/",
+    "firefox:start": "web-ext run -t firefox-desktop --source-dir ./dist/",
+    "watch": "webpack --watch",
+    "build": "webpack",
+    "bundle": "cross-env NODE_ENV=production webpack && web-ext build -o --source-dir ./dist/"
   },
   "repository": {
     "type": "git",
@@ -26,15 +25,23 @@
   },
   "homepage": "https://github.com/rndomhack/px-downloader#readme",
   "devDependencies": {
-    "@babel/core": "^7.8.4",
-    "@babel/preset-env": "^7.8.4",
-    "@babel/register": "^7.8.3",
-    "babel-loader": "^8.0.6",
-    "del": "^5.1.0",
-    "gulp": "^4.0.2",
-    "gulp-zip": "^5.0.1",
-    "vinyl-named": "^1.1.0",
-    "webpack": "^4.41.6",
-    "webpack-stream": "^5.2.1"
+    "@babel/core": "^7.12.9",
+    "@babel/preset-env": "^7.12.7",
+    "@babel/register": "^7.12.1",
+    "@ffmpeg/core": "^0.8.5",
+    "@ffmpeg/ffmpeg": "^0.9.6",
+    "babel-loader": "^8.2.2",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
+    "clean-webpack-plugin": "^3.0.0",
+    "copy-webpack-plugin": "^6.3.2",
+    "cross-env": "^7.0.3",
+    "gif.js": "^0.2.0",
+    "jszip": "^3.5.0",
+    "terser-webpack-plugin": "^5.0.3",
+    "wasm-imagemagick": "^1.2.8",
+    "web-ext": "^5.4.0",
+    "webextension-polyfill": "^0.7.0",
+    "webpack": "^5.10.0",
+    "webpack-cli": "^4.2.0"
   }
 }

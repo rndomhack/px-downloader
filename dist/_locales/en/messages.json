@@ -26,6 +26,9 @@
     "optSettingsForceFilename": {
         "message": "Ensure filename follows title (need restart)"
     },
+    "optSettingsDisableShelf": {
+        "message": "Disable download shelf"
+    },
     "optSettingsConflictActionUniquify": {
         "message": "Save with other name"
     },

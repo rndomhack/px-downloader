@@ -4,6 +4,7 @@
     "novelFilename": "PxDownloader/${userName}(${userId})/${title}(${id})",
     "conflictAction": "uniquify",
     "forceFilename": 0,
+    "disableShelf": 0,
     "singleSize": "original",
     "multiSize": "original",
     "ugoiraSize": "original",

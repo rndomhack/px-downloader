@@ -168,24 +168,6 @@ class Writer {
     }
 }
 
-function fetch(options) {
-    return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-
-        xhr.addEventListener("load", () => {
-            resolve(xhr.response);
-        });
-
-        xhr.addEventListener("error", err => {
-            reject(err);
-        });
-
-        xhr.open("GET", options.url);
-        xhr.responseType = options.responseType;
-        xhr.send();
-    });
-}
-
 export default class Apng {
     constructor() {
         this.canvas = document.createElement("canvas");
@@ -339,10 +321,8 @@ export default class Apng {
 
             const blobUrl = URL.createObjectURL(frame.blob);
 
-            const arrayBuffer = await fetch({
-                url: blobUrl,
-                responseType: "arraybuffer"
-            });
+            const response = await fetch(blobUrl);
+            const arrayBuffer = await response.arrayBuffer();
 
             URL.revokeObjectURL(blobUrl);
 

@@ -1,90 +1,46 @@
-import browser from "browser";
+import browser from "webextension-polyfill";
 
-export default class ExtensionUtil {
+class ExtensionUtil {
     constructor() {
+        this._storage = null;
+        this._browser = null;
+    }
+
+    get storage() {
+        if (this._storage !== null) return this._storage;
+
+        let storage;
+
         if (browser.storage.hasOwnProperty("sync")) {
-            this.storage = browser.storage.sync;
+            storage = browser.storage.sync;
         } else {
-            this.storage = browser.storage.local;
+            storage = browser.storage.local;
         }
+
+        this._storage = storage;
+
+        return storage;
+    }
+
+    get browser() {
+        if (this._browser !== null) return this._browser;
+
+        let _browser;
 
         if (navigator.userAgent.includes("Edge")) {
-            this.browser = "edge";
+            _browser = "edge";
         } else if (navigator.userAgent.includes("Chrome")) {
-            this.browser = "chrome";
+            _browser = "chrome";
         } else if (navigator.userAgent.includes("Firefox")) {
-            this.browser = "firefox";
+            _browser = "firefox";
         } else {
-            this.browser = "unknown";
+            _browser = "unknown";
         }
 
-        this.listeners = new Map();
-    }
+        this._browser = _browser;
 
-    listen() {
-        browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-            if (this.listeners.has(message.type)) {
-                this.listeners.get(message.type)(message.data).then(data => {
-                    sendResponse({ error: null, data });
-                }).catch(err => {
-                    sendResponse({ error: err.message, data: null });
-                });
-            }
-
-            return true;
-        });
-    }
-
-    addListener(type, listener) {
-        if (this.listeners.has(type)) return false;
-
-        this.listeners.set(type, listener);
-
-        return true;
-    }
-
-    removeListener(type) {
-        if (!this.listeners.has(type)) return false;
-
-        this.listeners.delete(type);
-
-        return true;
-    }
-
-    message(options) {
-        return new Promise((resolve, reject) => {
-            browser.runtime.sendMessage({
-                type: options.type,
-                data: options.data
-            }, response => {
-                if (response.error) {
-                    reject(new Error(response.error));
-                }
-
-                resolve(response.data);
-            });
-        });
-    }
-
-    getOptions(keys) {
-        return new Promise(resolve => {
-            this.storage.get(keys, options => {
-                resolve(options);
-            });
-        });
-    }
-
-    setOptions(options) {
-        return new Promise(resolve => {
-            this.storage.set(options, () => {
-                resolve();
-            });
-        });
-    }
-
-    initOptions(options) {
-        return this.getOptions(Object.keys(options)).then(oldOptions => {
-            return this.setOptions(Object.assign(options, oldOptions));
-        });
+        return _browser;
     }
 }
+
+export default new ExtensionUtil();
