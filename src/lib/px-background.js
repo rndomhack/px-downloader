@@ -404,6 +404,8 @@ export default class PxBackground {
     }
 
     async convert(options) {
+        const blobUrl = URL.createObjectURL(options.blob);
+
         return new Promise((resolve, reject) => {
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
@@ -430,7 +432,6 @@ export default class PxBackground {
             });
         });
 
-        // const blobUrl = URL.createObjectURL(options.blob);
         // const imageName = `input.${PxBackground.getExt(options.blob.type)}`;
         // const convertedImageName = `output.${PxBackground.getExt(options.type)}`;
 
