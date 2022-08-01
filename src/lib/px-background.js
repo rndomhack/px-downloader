@@ -641,7 +641,7 @@ export default class PxBackground {
         }
 
         if (data.hasOwnProperty("seriesNavData") && data.seriesNavData !== null) {
-            macro.seriesId = data.seriesNavData.seriesId;
+            macro.seriesId = data.seriesNavData.seriesId.toString();
             macro.seriesTitle = data.seriesNavData.title;
         } else {
             macro.seriesId = "";
