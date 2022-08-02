@@ -20,6 +20,9 @@
     "optSettingsNovelFilename": {
         "message": "Filename (novel)"
     },
+    "optSettingsNovelSeriesFilename": {
+        "message": "Filename (novel series)"
+    },
     "optSettingsConflictAction": {
         "message": "File conflicts action"
     },

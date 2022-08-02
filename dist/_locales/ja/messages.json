@@ -20,6 +20,9 @@
     "optSettingsNovelFilename": {
         "message": "ファイル名(小説)"
     },
+    "optSettingsNovelSeriesFilename": {
+        "message": "ファイル名(小説 シリーズ)"
+    },
     "optSettingsConflictAction": {
         "message": "ファイルが既に存在した場合の処理"
     },
