@@ -392,10 +392,16 @@ export default class PxBackground {
         this._callback({ state: "download" });
 
         const macro = PxBackground.getMacro(data);
-
+        let novelFilename
+        console.log(macro.seriesId)
+        if (macro.seriesId){
+            novelFilename = this._options.novelSeriesFilename;
+        } else {
+            novelFilename = this._options.novelFilename;
+        }
         await downloader.download({
             blob: textBlob,
-            filename: PxBackground.getFilename(macro, this._options.novelFilename, PxBackground.getExt(textBlob.type)),
+            filename: PxBackground.getFilename(macro, novelFilename, PxBackground.getExt(textBlob.type)),
             conflictAction: this._options.conflictAction,
             saveAs: false,
             forceFilename: this._options.forceFilename,
@@ -641,7 +647,7 @@ export default class PxBackground {
         }
 
         if (data.hasOwnProperty("seriesNavData") && data.seriesNavData !== null) {
-            macro.seriesId = data.seriesNavData.seriesId;
+            macro.seriesId = data.seriesNavData.seriesId.toString();
             macro.seriesTitle = data.seriesNavData.title;
         } else {
             macro.seriesId = "";

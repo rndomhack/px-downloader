@@ -2,6 +2,7 @@
     "singleFilename": "PxDownloader/${userName}(${userId})/${title}(${id})",
     "multiFilename": "PxDownloader/${userName}(${userId})/${title}(${id})/${page2}",
     "novelFilename": "PxDownloader/${userName}(${userId})/${title}(${id})",
+    "novelSeriesFilename": "PxDownloader/${userName}(${userId})/${seriesTitle}(${seriesId})/${title}(${id})",
     "conflictAction": "uniquify",
     "forceFilename": 0,
     "disableShelf": 0,
