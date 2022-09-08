@@ -36,7 +36,7 @@
     "copy-webpack-plugin": "^6.3.2",
     "cross-env": "^7.0.3",
     "gif.js": "^0.2.0",
-    "jszip": "^3.5.0",
+    "jszip": "^3.7.0",
     "terser-webpack-plugin": "^5.0.3",
     "wasm-imagemagick": "^1.2.8",
     "web-ext": "^5.4.0",
